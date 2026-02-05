@@ -7,8 +7,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../theme/colors';
+import { JobCardProps } from '../types';
 
-const JobCard = ({ job, onPress, showStatus = false, status }) => {
+const JobCard: React.FC<JobCardProps> = ({ job, onPress, showStatus = false, status }) => {
     const getStatusColor = () => {
         switch (status) {
             case 'Accepted':

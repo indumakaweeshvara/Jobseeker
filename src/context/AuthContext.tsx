@@ -1,20 +1,32 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
+    User as FirebaseUser,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebaseConfig';
+import { AuthContextType, User, AuthResult } from '../types';
 
-const AuthContext = createContext({});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = (): AuthContextType => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [userData, setUserData] = useState(null);
+interface AuthProviderProps {
+    children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+    const [user, setUser] = useState<FirebaseUser | null>(null);
+    const [userData, setUserData] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -24,7 +36,7 @@ export const AuthProvider = ({ children }) => {
                 // Fetch user data from Firestore
                 const userDoc = await getDoc(doc(db, 'Users', currentUser.uid));
                 if (userDoc.exists()) {
-                    setUserData(userDoc.data());
+                    setUserData(userDoc.data() as User);
                 }
             } else {
                 setUser(null);
@@ -37,7 +49,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // Signup function
-    const signup = async (email, password, name, phone) => {
+    const signup = async (email: string, password: string, name: string, phone: string): Promise<AuthResult> => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const newUser = userCredential.user;
@@ -53,37 +65,37 @@ export const AuthProvider = ({ children }) => {
             });
 
             return { success: true };
-        } catch (error) {
+        } catch (error: any) {
             return { success: false, error: error.message };
         }
     };
 
     // Login function
-    const login = async (email, password) => {
+    const login = async (email: string, password: string): Promise<AuthResult> => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             return { success: true };
-        } catch (error) {
+        } catch (error: any) {
             return { success: false, error: error.message };
         }
     };
 
     // Logout function
-    const logout = async () => {
+    const logout = async (): Promise<AuthResult> => {
         try {
             await signOut(auth);
             return { success: true };
-        } catch (error) {
+        } catch (error: any) {
             return { success: false, error: error.message };
         }
     };
 
     // Refresh user data
-    const refreshUserData = async () => {
+    const refreshUserData = async (): Promise<void> => {
         if (user) {
             const userDoc = await getDoc(doc(db, 'Users', user.uid));
             if (userDoc.exists()) {
-                setUserData(userDoc.data());
+                setUserData(userDoc.data() as User);
             }
         }
     };

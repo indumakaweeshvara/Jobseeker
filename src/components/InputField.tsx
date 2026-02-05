@@ -5,11 +5,26 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
+    KeyboardTypeOptions,
+    ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SIZES } from '../theme/colors';
 
-const InputField = ({
+interface InputFieldProps {
+    label?: string;
+    placeholder: string;
+    value: string;
+    onChangeText: (text: string) => void;
+    secureTextEntry?: boolean;
+    keyboardType?: KeyboardTypeOptions;
+    icon?: keyof typeof Ionicons.glyphMap;
+    error?: string;
+    style?: ViewStyle;
+    autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+}
+
+const InputField: React.FC<InputFieldProps> = ({
     label,
     placeholder,
     value,

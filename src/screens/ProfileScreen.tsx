@@ -22,14 +22,14 @@ import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
 
-const ProfileScreen = () => {
+const ProfileScreen: React.FC = () => {
     const { user, userData, logout, refreshUserData } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [profileImage, setProfileImage] = useState(null);
+    const [profileImage, setProfileImage] = useState<string | null>(null);
 
     useEffect(() => {
         if (userData) {
@@ -40,7 +40,7 @@ const ProfileScreen = () => {
     }, [userData]);
 
     // Request camera permissions
-    const requestPermissions = async () => {
+    const requestPermissions = async (): Promise<boolean> => {
         const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
         const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -55,11 +55,11 @@ const ProfileScreen = () => {
     };
 
     // Pick image from camera or gallery
-    const pickImage = async (useCamera = false) => {
+    const pickImage = async (useCamera: boolean = false): Promise<void> => {
         const hasPermissions = await requestPermissions();
         if (!hasPermissions) return;
 
-        const options = {
+        const options: ImagePicker.ImagePickerOptions = {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [1, 1],
@@ -79,7 +79,7 @@ const ProfileScreen = () => {
     };
 
     // Show image picker options
-    const showImageOptions = () => {
+    const showImageOptions = (): void => {
         Alert.alert(
             'Update Profile Photo',
             'Choose how you want to add a photo',
@@ -92,7 +92,7 @@ const ProfileScreen = () => {
     };
 
     // Upload image to Firebase Storage
-    const uploadProfileImage = async (uri) => {
+    const uploadProfileImage = async (uri: string): Promise<void> => {
         setUploadingImage(true);
         try {
             // Convert URI to blob
@@ -100,7 +100,7 @@ const ProfileScreen = () => {
             const blob = await response.blob();
 
             // Create storage reference
-            const imageRef = ref(storage, `profilePhotos/${user.uid}`);
+            const imageRef = ref(storage, `profilePhotos/${user?.uid}`);
 
             // Upload image
             await uploadBytes(imageRef, blob);
@@ -109,10 +109,12 @@ const ProfileScreen = () => {
             const downloadURL = await getDownloadURL(imageRef);
 
             // Update Firestore with new profile pic URL
-            await updateDoc(doc(db, 'Users', user.uid), {
-                profilePic: downloadURL,
-                updatedAt: new Date().toISOString(),
-            });
+            if (user?.uid) {
+                await updateDoc(doc(db, 'Users', user.uid), {
+                    profilePic: downloadURL,
+                    updatedAt: new Date().toISOString(),
+                });
+            }
 
             setProfileImage(downloadURL);
             await refreshUserData();
@@ -125,7 +127,7 @@ const ProfileScreen = () => {
         }
     };
 
-    const handleSave = async () => {
+    const handleSave = async (): Promise<void> => {
         if (!name.trim()) {
             Alert.alert('Error', 'Name is required');
             return;
@@ -133,11 +135,13 @@ const ProfileScreen = () => {
 
         setLoading(true);
         try {
-            await updateDoc(doc(db, 'Users', user.uid), {
-                name: name.trim(),
-                phone: phone.trim(),
-                updatedAt: new Date().toISOString(),
-            });
+            if (user?.uid) {
+                await updateDoc(doc(db, 'Users', user.uid), {
+                    name: name.trim(),
+                    phone: phone.trim(),
+                    updatedAt: new Date().toISOString(),
+                });
+            }
             await refreshUserData();
             setIsEditing(false);
             Alert.alert('Success', 'Profile updated successfully!');
@@ -149,7 +153,7 @@ const ProfileScreen = () => {
         }
     };
 
-    const handleLogout = () => {
+    const handleLogout = (): void => {
         Alert.alert(
             'Logout',
             'Are you sure you want to logout?',
@@ -166,7 +170,7 @@ const ProfileScreen = () => {
         );
     };
 
-    const handleCancel = () => {
+    const handleCancel = (): void => {
         setName(userData?.name || '');
         setPhone(userData?.phone || '');
         setIsEditing(false);

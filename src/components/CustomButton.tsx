@@ -4,11 +4,14 @@ import {
     Text,
     StyleSheet,
     ActivityIndicator,
+    ViewStyle,
+    TextStyle,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES } from '../theme/colors';
+import { CustomButtonProps } from '../types';
 
-const CustomButton = ({
+const CustomButton: React.FC<CustomButtonProps> = ({
     title,
     onPress,
     type = 'primary',
@@ -43,22 +46,22 @@ const CustomButton = ({
         );
     }
 
-    const buttonStyles = [
+    const buttonStyles: ViewStyle[] = [
         styles.button,
         type === 'primary' && styles.primaryButton,
         type === 'secondary' && styles.secondaryButton,
         type === 'outline' && styles.outlineButton,
         disabled && styles.disabled,
         style,
-    ];
+    ].filter(Boolean) as ViewStyle[];
 
-    const textStyles = [
+    const textStyles: TextStyle[] = [
         styles.buttonText,
         type === 'primary' && styles.whiteText,
         type === 'secondary' && styles.whiteText,
         type === 'outline' && styles.primaryText,
         textStyle,
-    ];
+    ].filter(Boolean) as TextStyle[];
 
     return (
         <TouchableOpacity
