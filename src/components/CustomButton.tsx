@@ -2,14 +2,23 @@ import React from 'react';
 import {
     TouchableOpacity,
     Text,
-    StyleSheet,
     ActivityIndicator,
     ViewStyle,
     TextStyle,
+    View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, SIZES } from '../theme/colors';
-import { CustomButtonProps } from '../types';
+
+interface CustomButtonProps {
+    title: string;
+    onPress: () => void;
+    type?: 'primary' | 'secondary' | 'outline' | 'gradient';
+    loading?: boolean;
+    disabled?: boolean;
+    style?: ViewStyle;
+    textStyle?: TextStyle;
+    className?: string;
+}
 
 const CustomButton: React.FC<CustomButtonProps> = ({
     title,
@@ -19,25 +28,26 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     disabled = false,
     style,
     textStyle,
+    className,
 }) => {
     if (type === 'gradient') {
         return (
             <TouchableOpacity
                 onPress={onPress}
                 disabled={disabled || loading}
-                style={[styles.buttonContainer, style]}
-                activeOpacity={0.8}
+                className={`rounded-2xl overflow-hidden shadow-lg shadow-blue-500/30 active:opacity-90 ${disabled ? 'opacity-60' : ''} ${className}`}
+                style={style}
             >
                 <LinearGradient
-                    colors={[COLORS.gradientStart, COLORS.gradientEnd]}
+                    colors={['#2563EB', '#7C3AED']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    style={[styles.gradient, disabled && styles.disabled]}
+                    className="py-4 px-6 justify-center items-center"
                 >
                     {loading ? (
-                        <ActivityIndicator color={COLORS.white} />
+                        <ActivityIndicator color="white" />
                     ) : (
-                        <Text style={[styles.buttonText, styles.whiteText, textStyle]}>
+                        <Text className="text-white text-lg font-bold tracking-wide" style={textStyle}>
                             {title}
                         </Text>
                     )}
@@ -46,83 +56,46 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         );
     }
 
-    const buttonStyles: ViewStyle[] = [
-        styles.button,
-        type === 'primary' && styles.primaryButton,
-        type === 'secondary' && styles.secondaryButton,
-        type === 'outline' && styles.outlineButton,
-        disabled && styles.disabled,
-        style,
-    ].filter(Boolean) as ViewStyle[];
+    const getButtonStyle = () => {
+        switch (type) {
+            case 'primary':
+                return 'bg-blue-600 active:bg-blue-700';
+            case 'secondary':
+                return 'bg-purple-600 active:bg-purple-700';
+            case 'outline':
+                return 'bg-transparent border-2 border-blue-600 active:bg-blue-50';
+            default:
+                return 'bg-blue-600';
+        }
+    };
 
-    const textStyles: TextStyle[] = [
-        styles.buttonText,
-        type === 'primary' && styles.whiteText,
-        type === 'secondary' && styles.whiteText,
-        type === 'outline' && styles.primaryText,
-        textStyle,
-    ].filter(Boolean) as TextStyle[];
+    const getTextStyle = () => {
+        switch (type) {
+            case 'outline':
+                return 'text-blue-600';
+            default:
+                return 'text-white';
+        }
+    };
 
     return (
         <TouchableOpacity
             onPress={onPress}
             disabled={disabled || loading}
-            style={buttonStyles}
-            activeOpacity={0.8}
+            className={`py-4 px-6 rounded-2xl justify-center items-center shadow-md ${getButtonStyle()} ${disabled ? 'opacity-60' : ''} ${className}`}
+            style={style}
         >
             {loading ? (
                 <ActivityIndicator
-                    color={type === 'outline' ? COLORS.primary : COLORS.white}
+                    color={type === 'outline' ? '#2563EB' : 'white'}
                 />
             ) : (
-                <Text style={textStyles}>{title}</Text>
+                <Text className={`text-lg font-bold tracking-wide ${getTextStyle()}`} style={textStyle}>
+                    {title}
+                </Text>
             )}
         </TouchableOpacity>
     );
 };
-
-const styles = StyleSheet.create({
-    buttonContainer: {
-        borderRadius: SIZES.radius,
-        overflow: 'hidden',
-    },
-    button: {
-        paddingVertical: 14,
-        paddingHorizontal: 24,
-        borderRadius: SIZES.radius,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    gradient: {
-        paddingVertical: 14,
-        paddingHorizontal: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    primaryButton: {
-        backgroundColor: COLORS.primary,
-    },
-    secondaryButton: {
-        backgroundColor: COLORS.secondary,
-    },
-    outlineButton: {
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        borderColor: COLORS.primary,
-    },
-    buttonText: {
-        fontSize: SIZES.lg,
-        fontWeight: '600',
-    },
-    whiteText: {
-        color: COLORS.white,
-    },
-    primaryText: {
-        color: COLORS.primary,
-    },
-    disabled: {
-        opacity: 0.6,
-    },
-});
 
 export default CustomButton;

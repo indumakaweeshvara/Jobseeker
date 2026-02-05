@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     ScrollView,
     TouchableOpacity,
     Alert,
@@ -13,10 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { doc, setDoc, getDocs, query, where, collection } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
-import { COLORS, SIZES } from '../theme/colors';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
-import { JobDetailScreenNavigationProp, JobDetailScreenRouteProp, Job } from '../types';
+import { JobDetailScreenNavigationProp, JobDetailScreenRouteProp } from '../types';
 
 interface JobDetailScreenProps {
     route: JobDetailScreenRouteProp;
@@ -94,115 +92,120 @@ const JobDetailScreen: React.FC<JobDetailScreenProps> = ({ route, navigation }) 
     };
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-slate-50">
             <StatusBar barStyle="light-content" />
 
             {/* Header */}
             <LinearGradient
-                colors={[COLORS.gradientStart, COLORS.gradientEnd]}
+                colors={['#1E40AF', '#7C3AED']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.header}
+                className="pt-12 pb-6 px-6 flex-row justify-between items-center z-10"
             >
                 <TouchableOpacity
-                    style={styles.backButton}
+                    className="w-10 h-10 rounded-xl bg-white/20 items-center justify-center backdrop-blur-md"
                     onPress={() => navigation.goBack()}
                 >
-                    <Ionicons name="arrow-back" size={24} color={COLORS.white} />
+                    <Ionicons name="arrow-back" size={24} color="white" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Job Details</Text>
-                <TouchableOpacity style={styles.shareButton}>
-                    <Ionicons name="share-outline" size={24} color={COLORS.white} />
+                <Text className="text-white text-lg font-bold">Job Details</Text>
+                <TouchableOpacity className="w-10 h-10 rounded-xl bg-white/20 items-center justify-center backdrop-blur-md">
+                    <Ionicons name="share-outline" size={24} color="white" />
                 </TouchableOpacity>
             </LinearGradient>
 
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={{ paddingBottom: 120 }}
             >
+                {/* Background Decor */}
+                <View className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-blue-700 to-purple-600" />
+                <LinearGradient
+                    colors={['#1E40AF', '#7C3AED']}
+                    className="absolute top-0 left-0 right-0 h-32 rounded-b-[40px]"
+                />
+
                 {/* Company Card */}
-                <View style={styles.companyCard}>
-                    <View style={styles.logoContainer}>
-                        <Ionicons name="business" size={40} color={COLORS.primary} />
+                <View className="mx-6 -mt-8 bg-white rounded-[24px] p-6 shadow-xl shadow-slate-200/50 items-center">
+                    <View className="w-20 h-20 bg-blue-50 rounded-2xl items-center justify-center -mt-12 mb-4 border-4 border-white shadow-sm">
+                        <Ionicons name="business" size={40} color="#2563EB" />
                     </View>
-                    <Text style={styles.jobTitle}>{job.title}</Text>
-                    <Text style={styles.companyName}>{job.company}</Text>
+                    <Text className="text-2xl font-bold text-slate-800 text-center mb-1">{job.title}</Text>
+                    <Text className="text-slate-500 text-base font-medium mb-4">{job.company}</Text>
 
-                    <View style={styles.tagContainer}>
-                        <View style={styles.tag}>
-                            <Ionicons name="location-outline" size={14} color={COLORS.primary} />
-                            <Text style={styles.tagText}>{job.location}</Text>
+                    <View className="flex-row flex-wrap justify-center gap-2">
+                        <View className="flex-row items-center bg-blue-50 px-3 py-1.5 rounded-full">
+                            <Ionicons name="location-outline" size={14} color="#2563EB" />
+                            <Text className="text-blue-700 text-xs font-semibold ml-1">{job.location}</Text>
                         </View>
-                        <View style={styles.tag}>
-                            <Ionicons name="time-outline" size={14} color={COLORS.primary} />
-                            <Text style={styles.tagText}>Full-time</Text>
+                        <View className="flex-row items-center bg-purple-50 px-3 py-1.5 rounded-full">
+                            <Ionicons name="time-outline" size={14} color="#7C3AED" />
+                            <Text className="text-purple-700 text-xs font-semibold ml-1">Full-time</Text>
                         </View>
-                    </View>
-                </View>
-
-                {/* Salary Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Salary</Text>
-                    <View style={styles.salaryCard}>
-                        <Ionicons name="cash-outline" size={24} color={COLORS.success} />
-                        <Text style={styles.salaryText}>{job.salary}</Text>
-                        <Text style={styles.salaryPeriod}>/month</Text>
+                        <View className="flex-row items-center bg-green-50 px-3 py-1.5 rounded-full">
+                            <Ionicons name="cash-outline" size={14} color="#16A34A" />
+                            <Text className="text-green-700 text-xs font-semibold ml-1">{job.salary}</Text>
+                        </View>
                     </View>
                 </View>
 
                 {/* Description Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Job Description</Text>
-                    <Text style={styles.description}>
+                <View className="mx-6 mt-6">
+                    <Text className="text-lg font-bold text-slate-800 mb-3">Job Description</Text>
+                    <Text className="text-slate-500 text-base leading-6">
                         {job.description ||
-                            `We are looking for a talented ${job.title} to join our team at ${job.company}. 
-              
-This is an excellent opportunity to work with a dynamic team and grow your career in a supportive environment.
-
-Key Responsibilities:
-• Collaborate with team members on various projects
-• Contribute to the development and improvement of our products
-• Participate in team meetings and brainstorming sessions
-• Stay up-to-date with industry trends and best practices
-
-Requirements:
-• Relevant experience in the field
-• Strong communication skills
-• Ability to work in a fast-paced environment
-• Team player with a positive attitude`}
+                            `We are looking for a talented ${job.title} to join our team at ${job.company}. \n\nThis is an excellent opportunity to work with a dynamic team and grow your career in a supportive environment.`}
                     </Text>
                 </View>
 
                 {/* Requirements Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Requirements</Text>
-                    <View style={styles.requirementItem}>
-                        <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
-                        <Text style={styles.requirementText}>Bachelor's degree or equivalent</Text>
-                    </View>
-                    <View style={styles.requirementItem}>
-                        <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
-                        <Text style={styles.requirementText}>2+ years of experience</Text>
-                    </View>
-                    <View style={styles.requirementItem}>
-                        <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
-                        <Text style={styles.requirementText}>Excellent communication skills</Text>
-                    </View>
-                    <View style={styles.requirementItem}>
-                        <Ionicons name="checkmark-circle" size={20} color={COLORS.success} />
-                        <Text style={styles.requirementText}>Team collaboration experience</Text>
-                    </View>
+                <View className="mx-6 mt-8">
+                    <Text className="text-lg font-bold text-slate-800 mb-4">Requirements</Text>
+                    {[
+                        "Bachelor's degree or equivalent",
+                        "2+ years of experience",
+                        "Excellent communication skills",
+                        "Team collaboration experience"
+                    ].map((req, index) => (
+                        <View key={index} className="flex-row items-center mb-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                            <View className="w-6 h-6 rounded-full bg-green-100 items-center justify-center mr-3">
+                                <Ionicons name="checkmark" size={14} color="#16A34A" />
+                            </View>
+                            <Text className="text-slate-600 font-medium flex-1">{req}</Text>
+                        </View>
+                    ))}
+                </View>
+
+                {/* Benefits Section Mock */}
+                <View className="mx-6 mt-8">
+                    <Text className="text-lg font-bold text-slate-800 mb-4">Perks & Benefits</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-6 px-6">
+                        {[
+                            { icon: 'medkit-outline', label: 'Health' },
+                            { icon: 'cafe-outline', label: 'Coffee' },
+                            { icon: 'airplane-outline', label: 'Travel' },
+                            { icon: 'fitness-outline', label: 'Gym' },
+                            { icon: 'school-outline', label: 'Learning' }
+                        ].map((item, i) => (
+                            <View key={i} className="mr-4 items-center">
+                                <View className="w-14 h-14 bg-white rounded-2xl border border-slate-100 items-center justify-center shadow-sm mb-2">
+                                    <Ionicons name={item.icon as any} size={24} color="#2563EB" />
+                                </View>
+                                <Text className="text-xs text-slate-500 font-medium">{item.label}</Text>
+                            </View>
+                        ))}
+                    </ScrollView>
                 </View>
             </ScrollView>
 
-            {/* Apply Button */}
-            <View style={styles.bottomBar}>
+            {/* Bottom Bar */}
+            <View className="absolute bottom-0 left-0 right-0 bg-white p-5 rounded-t-[30px] shadow-2xl shadow-black border-t border-slate-50">
                 {checkingStatus ? (
-                    <ActivityIndicator size="small" color={COLORS.primary} />
+                    <ActivityIndicator size="small" color="#2563EB" />
                 ) : hasApplied ? (
-                    <View style={styles.appliedContainer}>
-                        <Ionicons name="checkmark-circle" size={24} color={COLORS.success} />
-                        <Text style={styles.appliedText}>Application Submitted</Text>
+                    <View className="flex-row items-center justify-center bg-green-50 py-4 rounded-2xl border border-green-100">
+                        <Ionicons name="checkmark-circle" size={24} color="#16A34A" />
+                        <Text className="ml-2 text-green-700 font-bold text-lg">Application Submitted</Text>
                     </View>
                 ) : (
                     <CustomButton
@@ -210,175 +213,11 @@ Requirements:
                         onPress={handleApply}
                         type="gradient"
                         loading={loading}
-                        style={styles.applyButton}
                     />
                 )}
             </View>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: 50,
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-    },
-    backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: COLORS.white,
-    },
-    shareButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 100,
-    },
-    companyCard: {
-        backgroundColor: COLORS.white,
-        borderRadius: 20,
-        padding: 24,
-        alignItems: 'center',
-        marginTop: -10,
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 5,
-    },
-    logoContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 20,
-        backgroundColor: COLORS.infoBg,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    jobTitle: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: COLORS.textPrimary,
-        textAlign: 'center',
-        marginBottom: 6,
-    },
-    companyName: {
-        fontSize: 16,
-        color: COLORS.textSecondary,
-        marginBottom: 16,
-    },
-    tagContainer: {
-        flexDirection: 'row',
-    },
-    tag: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.infoBg,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-        marginHorizontal: 4,
-    },
-    tagText: {
-        marginLeft: 4,
-        fontSize: 13,
-        color: COLORS.primary,
-        fontWeight: '500',
-    },
-    section: {
-        marginTop: 24,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: COLORS.textPrimary,
-        marginBottom: 12,
-    },
-    salaryCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.successBg,
-        padding: 16,
-        borderRadius: 14,
-    },
-    salaryText: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: COLORS.success,
-        marginLeft: 12,
-    },
-    salaryPeriod: {
-        fontSize: 14,
-        color: COLORS.textSecondary,
-        marginLeft: 2,
-    },
-    description: {
-        fontSize: 15,
-        lineHeight: 24,
-        color: COLORS.textSecondary,
-    },
-    requirementItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    requirementText: {
-        marginLeft: 10,
-        fontSize: 15,
-        color: COLORS.textSecondary,
-    },
-    bottomBar: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: COLORS.white,
-        padding: 20,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 10,
-    },
-    applyButton: {
-        width: '100%',
-    },
-    appliedContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 14,
-    },
-    appliedText: {
-        marginLeft: 8,
-        fontSize: 16,
-        fontWeight: '600',
-        color: COLORS.success,
-    },
-});
 
 export default JobDetailScreen;

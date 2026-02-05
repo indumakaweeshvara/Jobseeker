@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     ScrollView,
     KeyboardAvoidingView,
     Platform,
@@ -12,7 +11,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SIZES } from '../theme/colors';
 import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
@@ -91,42 +89,58 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-slate-50">
             <StatusBar barStyle="light-content" />
 
             {/* Header with Gradient */}
             <LinearGradient
-                colors={[COLORS.gradientStart, COLORS.gradientEnd]}
+                colors={['#1E40AF', '#7C3AED']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.header}
+                className="pt-12 pb-20 px-6 rounded-b-[40px] shadow-xl"
+                style={{
+                    shadowColor: '#2563EB',
+                    shadowOffset: { width: 0, height: 10 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 20,
+                }}
             >
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Ionicons name="arrow-back" size={24} color={COLORS.white} />
-                </TouchableOpacity>
-                <View style={styles.logoContainer}>
-                    <Ionicons name="person-add" size={40} color={COLORS.white} />
+                <View className="flex-row items-center justify-between mb-8">
+                    <TouchableOpacity
+                        className="w-10 h-10 rounded-full bg-white/20 items-center justify-center backdrop-blur-md"
+                        onPress={() => navigation.goBack()}
+                    >
+                        <Ionicons name="arrow-back" size={24} color="white" />
+                    </TouchableOpacity>
+                    <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center backdrop-blur-md">
+                        <Ionicons name="person-add" size={20} color="white" />
+                    </View>
                 </View>
-                <Text style={styles.headerTitle}>Create Account</Text>
-                <Text style={styles.headerSubtitle}>Join JobSeeker today</Text>
+
+                <View>
+                    <Text className="text-3xl font-bold text-white mb-2">Create Account</Text>
+                    <Text className="text-blue-100 text-lg">Join us and jumpstart your career</Text>
+                </View>
+
+                {/* Decorative Circles */}
+                <View className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-bl-[100px] -mr-10 -mt-10" />
+                <View className="absolute bottom-10 right-10 w-16 h-16 bg-white/5 rounded-full" />
             </LinearGradient>
 
             {/* Form Container */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.formWrapper}
+                className="flex-1 -mt-12"
             >
                 <ScrollView
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     showsVerticalScrollIndicator={false}
+                    className="px-6"
                 >
-                    <View style={styles.formContainer}>
+                    <View className="bg-white rounded-[30px] p-6 shadow-xl shadow-slate-200/50 mb-8">
                         <InputField
                             label="Full Name"
-                            placeholder="Enter your full name"
+                            placeholder="Type your full name"
                             value={name}
                             onChangeText={setName}
                             icon="person-outline"
@@ -135,8 +149,8 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
                         />
 
                         <InputField
-                            label="Email"
-                            placeholder="Enter your email"
+                            label="Email Address"
+                            placeholder="Type your email"
                             value={email}
                             onChangeText={setEmail}
                             keyboardType="email-address"
@@ -146,7 +160,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
 
                         <InputField
                             label="Phone Number"
-                            placeholder="Enter your phone number"
+                            placeholder="Type your phone number"
                             value={phone}
                             onChangeText={setPhone}
                             keyboardType="phone-pad"
@@ -156,7 +170,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
 
                         <InputField
                             label="Password"
-                            placeholder="Create a password"
+                            placeholder="Create a strong password"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
@@ -174,18 +188,19 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
                             error={errors.confirmPassword}
                         />
 
-                        <CustomButton
-                            title="Create Account"
-                            onPress={handleSignup}
-                            type="gradient"
-                            loading={loading}
-                            style={styles.signupButton}
-                        />
+                        <View className="mt-4">
+                            <CustomButton
+                                title="Sign Up"
+                                onPress={handleSignup}
+                                type="gradient"
+                                loading={loading}
+                            />
+                        </View>
 
-                        <View style={styles.loginContainer}>
-                            <Text style={styles.loginText}>Already have an account? </Text>
+                        <View className="flex-row justify-center items-center mt-6">
+                            <Text className="text-slate-500">Already have an account? </Text>
                             <TouchableOpacity onPress={() => navigation.goBack()}>
-                                <Text style={styles.loginLink}>Sign In</Text>
+                                <Text className="text-blue-600 font-bold ml-1">Log In</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -194,88 +209,5 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    header: {
-        height: 220,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderBottomLeftRadius: 40,
-        borderBottomRightRadius: 40,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 50,
-        left: 20,
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    logoContainer: {
-        width: 70,
-        height: 70,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    headerTitle: {
-        fontSize: 26,
-        fontWeight: '700',
-        color: COLORS.white,
-        marginBottom: 4,
-    },
-    headerSubtitle: {
-        fontSize: 14,
-        color: 'rgba(255, 255, 255, 0.8)',
-    },
-    formWrapper: {
-        flex: 1,
-        marginTop: -30,
-    },
-    scrollContent: {
-        flexGrow: 1,
-    },
-    formContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingHorizontal: 24,
-        paddingTop: 30,
-        paddingBottom: 24,
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: -5 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 10,
-    },
-    signupButton: {
-        marginTop: 24,
-    },
-    loginContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 24,
-    },
-    loginText: {
-        fontSize: 15,
-        color: COLORS.textSecondary,
-    },
-    loginLink: {
-        fontSize: 15,
-        color: COLORS.primary,
-        fontWeight: '700',
-    },
-});
 
 export default SignupScreen;

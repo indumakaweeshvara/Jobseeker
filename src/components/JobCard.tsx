@@ -2,165 +2,94 @@ import React from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SIZES } from '../theme/colors';
 import { JobCardProps } from '../types';
 
 const JobCard: React.FC<JobCardProps> = ({ job, onPress, showStatus = false, status }) => {
     const getStatusColor = () => {
         switch (status) {
             case 'Accepted':
-                return { bg: COLORS.successBg, text: COLORS.success };
+                return { bg: 'bg-green-100', text: 'text-green-600', icon: 'checkmark-circle' };
             case 'Rejected':
-                return { bg: COLORS.errorBg, text: COLORS.error };
+                return { bg: 'bg-red-100', text: 'text-red-600', icon: 'close-circle' };
             default:
-                return { bg: COLORS.warningBg, text: COLORS.warning };
+                return { bg: 'bg-amber-100', text: 'text-amber-600', icon: 'time' };
         }
     };
 
-    const statusColors = getStatusColor();
+    const statusInfo = getStatusColor();
 
     return (
         <TouchableOpacity
-            style={styles.card}
+            className="bg-white rounded-[20px] p-5 mb-4 shadow-sm border border-slate-100 active:bg-slate-50"
             onPress={onPress}
             activeOpacity={0.7}
+            style={{
+                shadowColor: '#64748B',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.05,
+                shadowRadius: 10,
+                elevation: 3,
+            }}
         >
-            <View style={styles.header}>
-                <View style={styles.logoContainer}>
-                    <Ionicons name="business" size={28} color={COLORS.primary} />
+            <View className="flex-row items-start mb-4">
+                <View className="w-14 h-14 rounded-2xl bg-blue-50 items-center justify-center mr-4 border border-blue-100">
+                    <Ionicons name="business" size={26} color="#2563EB" />
                 </View>
-                <View style={styles.headerInfo}>
-                    <Text style={styles.title} numberOfLines={1}>
-                        {job.title}
-                    </Text>
-                    <Text style={styles.company} numberOfLines={1}>
+
+                <View className="flex-1">
+                    <View className="flex-row justify-between items-start">
+                        <Text className="text-lg font-bold text-slate-800 flex-1 mr-2" numberOfLines={1}>
+                            {job.title}
+                        </Text>
+                        {showStatus && status && (
+                            <View className={`px-2.5 py-1 rounded-full flex-row items-center ${statusInfo.bg}`}>
+                                <Ionicons name={statusInfo.icon as any} size={12} className={`mr-1 ${statusInfo.text}`} />
+                                <Text className={`text-xs font-bold ${statusInfo.text}`}>
+                                    {status}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                    <Text className="text-slate-500 text-sm font-medium mt-1">
                         {job.company}
                     </Text>
                 </View>
-                {showStatus && status && (
-                    <View style={[styles.statusBadge, { backgroundColor: statusColors.bg }]}>
-                        <Text style={[styles.statusText, { color: statusColors.text }]}>
-                            {status}
-                        </Text>
-                    </View>
-                )}
             </View>
 
-            <View style={styles.details}>
-                <View style={styles.detailItem}>
-                    <Ionicons name="location-outline" size={16} color={COLORS.textSecondary} />
-                    <Text style={styles.detailText}>{job.location}</Text>
+            <View className="flex-row items-center mb-4 space-x-4">
+                <View className="flex-row items-center bg-slate-50 px-3 py-1.5 rounded-lg">
+                    <Ionicons name="location-outline" size={14} color="#64748B" />
+                    <Text className="text-slate-600 text-xs font-semibold ml-1.5">
+                        {job.location}
+                    </Text>
                 </View>
-                <View style={styles.detailItem}>
-                    <Ionicons name="cash-outline" size={16} color={COLORS.textSecondary} />
-                    <Text style={styles.detailText}>{job.salary}</Text>
+                <View className="flex-row items-center bg-green-50 px-3 py-1.5 rounded-lg border border-green-100">
+                    <Ionicons name="cash-outline" size={14} color="#16A34A" />
+                    <Text className="text-green-700 text-xs font-bold ml-1.5">
+                        {job.salary}
+                    </Text>
                 </View>
             </View>
 
-            <View style={styles.footer}>
-                <View style={styles.tags}>
-                    <View style={styles.tag}>
-                        <Text style={styles.tagText}>Full-time</Text>
+            <View className="flex-row justify-between items-center pt-4 border-t border-slate-100">
+                <View className="flex-row space-x-2">
+                    <View className="bg-slate-100 px-2.5 py-1 rounded-md">
+                        <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">full-time</Text>
                     </View>
-                    <View style={styles.tag}>
-                        <Text style={styles.tagText}>Remote</Text>
+                    <View className="bg-slate-100 px-2.5 py-1 rounded-md">
+                        <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">remote</Text>
                     </View>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
+                <View className="flex-row items-center">
+                    <Text className="text-slate-400 text-xs font-medium mr-1">Details</Text>
+                    <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
+                </View>
             </View>
         </TouchableOpacity>
     );
 };
-
-const styles = StyleSheet.create({
-    card: {
-        backgroundColor: COLORS.white,
-        borderRadius: SIZES.radius,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    logoContainer: {
-        width: 50,
-        height: 50,
-        borderRadius: 12,
-        backgroundColor: COLORS.infoBg,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 12,
-    },
-    headerInfo: {
-        flex: 1,
-    },
-    title: {
-        fontSize: SIZES.lg,
-        fontWeight: '700',
-        color: COLORS.textPrimary,
-        marginBottom: 2,
-    },
-    company: {
-        fontSize: SIZES.md,
-        color: COLORS.textSecondary,
-    },
-    statusBadge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 20,
-    },
-    statusText: {
-        fontSize: SIZES.sm,
-        fontWeight: '600',
-    },
-    details: {
-        flexDirection: 'row',
-        marginBottom: 12,
-    },
-    detailItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 20,
-    },
-    detailText: {
-        fontSize: SIZES.sm,
-        color: COLORS.textSecondary,
-        marginLeft: 4,
-    },
-    footer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderTopWidth: 1,
-        borderTopColor: COLORS.border,
-        paddingTop: 12,
-    },
-    tags: {
-        flexDirection: 'row',
-    },
-    tag: {
-        backgroundColor: COLORS.background,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 6,
-        marginRight: 8,
-    },
-    tagText: {
-        fontSize: SIZES.xs,
-        color: COLORS.textSecondary,
-        fontWeight: '500',
-    },
-});
 
 export default JobCard;

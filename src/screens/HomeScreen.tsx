@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, StyleSheet, FlatList, RefreshControl, TextInput,
+    View, Text, FlatList, RefreshControl, TextInput,
     TouchableOpacity, StatusBar, ActivityIndicator, Alert, ListRenderItem,
+    Image,
+    ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
-import { COLORS, SIZES } from '../theme/colors';
 import JobCard from '../components/JobCard';
 import { useAuth } from '../context/AuthContext';
 import { seedJobs } from '../services/seedData';
@@ -24,6 +25,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState('All');
+
+    const categories = ['All', 'Design', 'Development', 'Marketing', 'Finance'];
 
     const fetchJobs = async (): Promise<void> => {
         try {
@@ -44,17 +48,25 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     useEffect(() => { fetchJobs(); }, []);
 
     useEffect(() => {
+        let result = jobs;
+
+        // Filter by Search
         if (searchQuery) {
-            const filtered = jobs.filter(job =>
+            result = result.filter(job =>
                 job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 job.location?.toLowerCase().includes(searchQuery.toLowerCase())
             );
-            setFilteredJobs(filtered);
-        } else {
-            setFilteredJobs(jobs);
         }
-    }, [searchQuery, jobs]);
+
+        // Filter by Category (Mock logic since jobs might not have category field yet)
+        if (activeCategory !== 'All') {
+            // In a real app, you would filter by job.category
+            // For now just showing all or simple mock filtering
+        }
+
+        setFilteredJobs(result);
+    }, [searchQuery, jobs, activeCategory]);
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -82,83 +94,133 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     if (loading) {
         return (
-            <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.loadingText}>Loading jobs...</Text>
+            <View className="flex-1 justify-center items-center bg-slate-50">
+                <ActivityIndicator size="large" color="#2563EB" />
+                <Text className="mt-4 text-slate-500 font-medium">Finding your next career...</Text>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-slate-50">
             <StatusBar barStyle="light-content" />
             <FlatList
                 data={filteredJobs}
                 renderItem={renderJobCard}
                 keyExtractor={(item) => item.id}
+                showsVerticalScrollIndicator={false}
                 ListHeaderComponent={() => (
                     <>
-                        <LinearGradient colors={[COLORS.gradientStart, COLORS.gradientEnd]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
-                            <View style={styles.headerContent}>
+                        <LinearGradient
+                            colors={['#1E40AF', '#7C3AED']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            className="pt-14 pb-8 px-6 rounded-b-[40px] shadow-lg mb-6"
+                            style={{
+                                shadowColor: '#2563EB',
+                                shadowOffset: { width: 0, height: 8 },
+                                shadowOpacity: 0.2,
+                                shadowRadius: 16,
+                            }}
+                        >
+                            {/* Header Top Row */}
+                            <View className="flex-row justify-between items-center mb-6">
                                 <View>
-                                    <Text style={styles.greeting}>Hello, {userData?.name || 'User'}! 👋</Text>
-                                    <Text style={styles.subtitle}>Find your perfect job</Text>
+                                    <Text className="text-blue-100 text-base font-medium">Good Morning,</Text>
+                                    <Text className="text-white text-2xl font-bold">{userData?.name || 'Job Seeker'} 👋</Text>
                                 </View>
-                                <TouchableOpacity style={styles.notificationBtn}>
-                                    <Ionicons name="notifications-outline" size={24} color={COLORS.white} />
+                                <TouchableOpacity className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center backdrop-blur-md border border-white/10">
+                                    <View className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#7C3AED]" />
+                                    <Ionicons name="notifications-outline" size={24} color="white" />
                                 </TouchableOpacity>
                             </View>
-                            <View style={styles.searchContainer}>
-                                <Ionicons name="search-outline" size={20} color={COLORS.textSecondary} />
-                                <TextInput style={styles.searchInput} placeholder="Search jobs..." placeholderTextColor={COLORS.textSecondary} value={searchQuery} onChangeText={setSearchQuery} />
+
+                            {/* Search Bar */}
+                            <View className="flex-row items-center bg-white rounded-2xl px-4 py-3 shadow-md mb-6">
+                                <Ionicons name="search-outline" size={22} color="#94A3B8" />
+                                <TextInput
+                                    className="flex-1 ml-3 text-base text-slate-800"
+                                    placeholder="Search for jobs, companies..."
+                                    placeholderTextColor="#94A3B8"
+                                    value={searchQuery}
+                                    onChangeText={setSearchQuery}
+                                />
+                                <TouchableOpacity className="bg-blue-50 p-2 rounded-xl">
+                                    <Ionicons name="options-outline" size={20} color="#2563EB" />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Stats */}
+                            <View className="flex-row justify-between space-x-3">
+                                <View className="flex-1 bg-white/10 p-3 rounded-2xl border border-white/10 items-center justify-center">
+                                    <Text className="text-white font-bold text-xl">{jobs.length}</Text>
+                                    <Text className="text-blue-100 text-xs mt-1">Open Jobs</Text>
+                                </View>
+                                <View className="flex-1 bg-white/10 p-3 rounded-2xl border border-white/10 items-center justify-center">
+                                    <Text className="text-white font-bold text-xl">12</Text>
+                                    <Text className="text-blue-100 text-xs mt-1">New</Text>
+                                </View>
+                                <View className="flex-1 bg-white/10 p-3 rounded-2xl border border-white/10 items-center justify-center">
+                                    <Text className="text-white font-bold text-xl">5</Text>
+                                    <Text className="text-blue-100 text-xs mt-1">Applied</Text>
+                                </View>
                             </View>
                         </LinearGradient>
-                        <View style={styles.statsContainer}>
-                            <View style={styles.statCard}><Text style={styles.statNumber}>{jobs.length}</Text><Text style={styles.statLabel}>Jobs</Text></View>
-                            <View style={styles.statCard}><Text style={styles.statNumber}>12</Text><Text style={styles.statLabel}>Companies</Text></View>
-                            <View style={styles.statCard}><Text style={styles.statNumber}>5</Text><Text style={styles.statLabel}>Categories</Text></View>
+
+                        {/* Categories ScrollView */}
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            className="px-6 mb-6"
+                            contentContainerStyle={{ paddingRight: 24 }}
+                        >
+                            {categories.map((cat, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    onPress={() => setActiveCategory(cat)}
+                                    className={`mr-3 px-5 py-2.5 rounded-full border ${activeCategory === cat
+                                            ? 'bg-blue-600 border-blue-600 shadow-md shadow-blue-500/30'
+                                            : 'bg-white border-slate-200'
+                                        }`}
+                                >
+                                    <Text className={`font-semibold text-sm ${activeCategory === cat ? 'text-white' : 'text-slate-500'
+                                        }`}>
+                                        {cat}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+
+                        <View className="px-6 flex-row justify-between items-end mb-4">
+                            <Text className="text-xl font-bold text-slate-800">Recent Jobs</Text>
+                            <TouchableOpacity>
+                                <Text className="text-blue-600 text-sm font-semibold">View All</Text>
+                            </TouchableOpacity>
                         </View>
-                        <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Recent Jobs</Text></View>
                     </>
                 )}
                 ListEmptyComponent={() => (
-                    <View style={styles.emptyContainer}>
-                        <Ionicons name="briefcase-outline" size={60} color={COLORS.textLight} />
-                        <Text style={styles.emptyText}>No jobs found</Text>
-                        <TouchableOpacity style={styles.seedButton} onPress={handleSeedJobs}>
-                            <Text style={styles.seedButtonText}>Load Sample Jobs</Text>
+                    <View className="items-center pt-10 px-6">
+                        <View className="w-24 h-24 bg-slate-100 rounded-full items-center justify-center mb-4">
+                            <Ionicons name="briefcase-outline" size={40} color="#94A3B8" />
+                        </View>
+                        <Text className="text-xl font-bold text-slate-700">No Jobs Found</Text>
+                        <Text className="text-slate-400 text-center mt-2 mb-6">
+                            We couldn't find any jobs matching your search. Try different keywords.
+                        </Text>
+                        <TouchableOpacity
+                            className="bg-blue-600 px-6 py-3 rounded-xl shadow-lg shadow-blue-500/30"
+                            onPress={handleSeedJobs}
+                        >
+                            <Text className="text-white font-bold">Post Sample Jobs</Text>
                         </TouchableOpacity>
                     </View>
                 )}
-                contentContainerStyle={styles.listContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />}
+                contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2563EB" />}
             />
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.background },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
-    loadingText: { marginTop: 12, fontSize: SIZES.md, color: COLORS.textSecondary },
-    header: { paddingTop: 50, paddingHorizontal: 20, paddingBottom: 30, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
-    headerContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-    greeting: { fontSize: 24, fontWeight: '700', color: COLORS.white, marginBottom: 4 },
-    subtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)' },
-    notificationBtn: { width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' },
-    searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.white, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12 },
-    searchInput: { flex: 1, marginLeft: 10, fontSize: SIZES.md, color: COLORS.textPrimary },
-    statsContainer: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, marginTop: 20 },
-    statCard: { flex: 1, backgroundColor: COLORS.white, borderRadius: 12, padding: 12, marginHorizontal: 4, alignItems: 'center' },
-    statNumber: { fontSize: 20, fontWeight: '700', color: COLORS.primary },
-    statLabel: { fontSize: 11, color: COLORS.textSecondary },
-    sectionHeader: { paddingHorizontal: 20, marginTop: 24, marginBottom: 16 },
-    sectionTitle: { fontSize: 18, fontWeight: '700', color: COLORS.textPrimary },
-    listContent: { paddingHorizontal: 20, paddingBottom: 100 },
-    emptyContainer: { alignItems: 'center', paddingTop: 40 },
-    emptyText: { fontSize: 18, fontWeight: '600', color: COLORS.textPrimary, marginTop: 16 },
-    seedButton: { backgroundColor: COLORS.primary, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, marginTop: 20 },
-    seedButtonText: { color: COLORS.white, fontSize: 14, fontWeight: '600' },
-});
 
 export default HomeScreen;

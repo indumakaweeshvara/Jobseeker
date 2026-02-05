@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     ScrollView,
     KeyboardAvoidingView,
     Platform,
     TouchableOpacity,
     Alert,
     StatusBar,
+    Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SIZES } from '../theme/colors';
+import { BlurView } from 'expo-blur';
 import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
@@ -67,38 +67,74 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-slate-50">
             <StatusBar barStyle="light-content" />
 
-            {/* Header with Gradient */}
+            {/* Animated Background with Gradient */}
             <LinearGradient
-                colors={[COLORS.gradientStart, COLORS.gradientEnd]}
+                colors={['#1E40AF', '#7C3AED', '#DB2777']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.header}
+                className="h-80 justify-center items-center"
+                style={{
+                    borderBottomLeftRadius: 50,
+                    borderBottomRightRadius: 50,
+                }}
             >
-                <View style={styles.logoContainer}>
-                    <Ionicons name="briefcase" size={50} color={COLORS.white} />
+                {/* Floating Circles for Visual Effect */}
+                <View className="absolute top-10 left-5 w-24 h-24 rounded-full bg-white/10" />
+                <View className="absolute top-32 right-8 w-16 h-16 rounded-full bg-white/10" />
+                <View className="absolute bottom-20 left-20 w-12 h-12 rounded-full bg-white/15" />
+
+                {/* Logo Container with Glassmorphism Effect */}
+                <View className="w-28 h-28 rounded-3xl bg-white/20 justify-center items-center mb-4 shadow-2xl"
+                    style={{
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 10 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 20,
+                    }}
+                >
+                    <View className="w-20 h-20 rounded-2xl bg-white justify-center items-center">
+                        <Ionicons name="briefcase" size={45} color="#2563EB" />
+                    </View>
                 </View>
-                <Text style={styles.appName}>JobSeeker</Text>
-                <Text style={styles.tagline}>Find Your Dream Job</Text>
+                <Text className="text-4xl font-bold text-white mb-2 tracking-wider">
+                    JobSeeker
+                </Text>
+                <Text className="text-base text-white/80 font-medium">
+                    Your Dream Career Awaits ✨
+                </Text>
             </LinearGradient>
 
-            {/* Form Container */}
+            {/* Form Container with Modern Card Design */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.formWrapper}
+                className="flex-1 -mt-8"
             >
                 <ScrollView
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     showsVerticalScrollIndicator={false}
                 >
-                    <View style={styles.formContainer}>
-                        <Text style={styles.welcomeText}>Welcome Back!</Text>
-                        <Text style={styles.subtitle}>Sign in to continue</Text>
+                    <View className="flex-1 bg-white rounded-t-[40px] px-7 pt-10 pb-8"
+                        style={{
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: -10 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 20,
+                            elevation: 20,
+                        }}
+                    >
+                        <Text className="text-3xl font-bold text-slate-800 mb-2">
+                            Welcome Back! 👋
+                        </Text>
+                        <Text className="text-base text-slate-500 mb-8">
+                            Sign in to continue your journey
+                        </Text>
 
+                        {/* Email Input with Icon */}
                         <InputField
-                            label="Email"
+                            label="Email Address"
                             placeholder="Enter your email"
                             value={email}
                             onChangeText={setEmail}
@@ -107,6 +143,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             error={errors.email}
                         />
 
+                        {/* Password Input with Icon */}
                         <InputField
                             label="Password"
                             placeholder="Enter your password"
@@ -117,28 +154,76 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             error={errors.password}
                         />
 
-                        <TouchableOpacity style={styles.forgotPassword}>
-                            <Text style={styles.forgotText}>Forgot Password?</Text>
+                        {/* Forgot Password Link */}
+                        <TouchableOpacity className="self-end mb-6">
+                            <Text className="text-blue-600 text-sm font-semibold">
+                                Forgot Password?
+                            </Text>
                         </TouchableOpacity>
 
+                        {/* Login Button with Gradient */}
                         <CustomButton
                             title="Sign In"
                             onPress={handleLogin}
                             type="gradient"
                             loading={loading}
-                            style={styles.loginButton}
                         />
 
-                        <View style={styles.divider}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.dividerText}>OR</Text>
-                            <View style={styles.dividerLine} />
+                        {/* Divider */}
+                        <View className="flex-row items-center my-8">
+                            <View className="flex-1 h-px bg-slate-200" />
+                            <Text className="mx-4 text-slate-400 text-sm font-medium">
+                                OR
+                            </Text>
+                            <View className="flex-1 h-px bg-slate-200" />
                         </View>
 
-                        <View style={styles.signupContainer}>
-                            <Text style={styles.signupText}>Don't have an account? </Text>
+                        {/* Social Login Buttons */}
+                        <View className="flex-row justify-center gap-4 mb-6">
+                            <TouchableOpacity className="w-14 h-14 rounded-2xl bg-slate-100 items-center justify-center"
+                                style={{
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.1,
+                                    shadowRadius: 5,
+                                    elevation: 3,
+                                }}
+                            >
+                                <Ionicons name="logo-google" size={24} color="#EA4335" />
+                            </TouchableOpacity>
+                            <TouchableOpacity className="w-14 h-14 rounded-2xl bg-slate-100 items-center justify-center"
+                                style={{
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.1,
+                                    shadowRadius: 5,
+                                    elevation: 3,
+                                }}
+                            >
+                                <Ionicons name="logo-apple" size={24} color="#000" />
+                            </TouchableOpacity>
+                            <TouchableOpacity className="w-14 h-14 rounded-2xl bg-slate-100 items-center justify-center"
+                                style={{
+                                    shadowColor: '#000',
+                                    shadowOffset: { width: 0, height: 2 },
+                                    shadowOpacity: 0.1,
+                                    shadowRadius: 5,
+                                    elevation: 3,
+                                }}
+                            >
+                                <Ionicons name="logo-linkedin" size={24} color="#0A66C2" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Sign Up Link */}
+                        <View className="flex-row justify-center items-center mt-2">
+                            <Text className="text-base text-slate-500">
+                                Don't have an account?{' '}
+                            </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                                <Text style={styles.signupLink}>Sign Up</Text>
+                                <Text className="text-base text-blue-600 font-bold">
+                                    Sign Up
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -147,111 +232,5 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    header: {
-        height: 280,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderBottomLeftRadius: 40,
-        borderBottomRightRadius: 40,
-    },
-    logoContainer: {
-        width: 90,
-        height: 90,
-        borderRadius: 25,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    appName: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: COLORS.white,
-        marginBottom: 8,
-    },
-    tagline: {
-        fontSize: 16,
-        color: 'rgba(255, 255, 255, 0.8)',
-    },
-    formWrapper: {
-        flex: 1,
-        marginTop: -30,
-    },
-    scrollContent: {
-        flexGrow: 1,
-    },
-    formContainer: {
-        flex: 1,
-        backgroundColor: COLORS.white,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
-        paddingHorizontal: 24,
-        paddingTop: 30,
-        paddingBottom: 24,
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: -5 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 10,
-    },
-    welcomeText: {
-        fontSize: 26,
-        fontWeight: '700',
-        color: COLORS.textPrimary,
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 15,
-        color: COLORS.textSecondary,
-        marginBottom: 24,
-    },
-    forgotPassword: {
-        alignSelf: 'flex-end',
-        marginBottom: 20,
-    },
-    forgotText: {
-        color: COLORS.primary,
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    loginButton: {
-        marginTop: 8,
-    },
-    divider: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 24,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: COLORS.border,
-    },
-    dividerText: {
-        marginHorizontal: 16,
-        color: COLORS.textSecondary,
-        fontSize: 14,
-    },
-    signupContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    signupText: {
-        fontSize: 15,
-        color: COLORS.textSecondary,
-    },
-    signupLink: {
-        fontSize: 15,
-        color: COLORS.primary,
-        fontWeight: '700',
-    },
-});
 
 export default LoginScreen;

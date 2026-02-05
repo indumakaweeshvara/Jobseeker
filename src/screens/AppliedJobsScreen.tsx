@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, StyleSheet, FlatList, RefreshControl, TouchableOpacity,
+    View, Text, FlatList, RefreshControl, TouchableOpacity,
     Alert, StatusBar, ActivityIndicator, ListRenderItem,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
-import { COLORS, SIZES } from '../theme/colors';
 import { useAuth } from '../context/AuthContext';
 
 interface Application {
@@ -51,7 +50,7 @@ const AppliedJobsScreen: React.FC = () => {
     }, []);
 
     const handleWithdraw = (application: Application): void => {
-        Alert.alert('Withdraw Application', `Withdraw application for ${application.jobTitle}?`, [
+        Alert.alert('Withdraw Application', `Are you sure you want to withdraw your application for ${application.jobTitle}?`, [
             { text: 'Cancel', style: 'cancel' },
             {
                 text: 'Withdraw', style: 'destructive',
@@ -66,94 +65,124 @@ const AppliedJobsScreen: React.FC = () => {
         ]);
     };
 
-    const renderApplicationCard: ListRenderItem<Application> = ({ item }) => (
-        <View style={styles.applicationCard}>
-            <View style={styles.cardHeader}>
-                <View style={styles.logoContainer}><Ionicons name="business" size={28} color={COLORS.primary} /></View>
-                <View style={styles.cardInfo}>
-                    <Text style={styles.jobTitle} numberOfLines={1}>{item.jobTitle}</Text>
-                    <Text style={styles.companyName}>{item.company}</Text>
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case 'Accepted': return { bg: 'bg-green-100', text: 'text-green-700', icon: 'checkmark-circle' };
+            case 'Rejected': return { bg: 'bg-red-100', text: 'text-red-700', icon: 'close-circle' };
+            default: return { bg: 'bg-amber-100', text: 'text-amber-700', icon: 'time' };
+        }
+    };
+
+    const renderApplicationCard: ListRenderItem<Application> = ({ item }) => {
+        const statusStyle = getStatusStyle(item.status);
+
+        return (
+            <View className="bg-white rounded-2xl p-5 mb-4 shadow-md shadow-slate-200 border border-slate-100">
+                <View className="flex-row items-center justify-between mb-4">
+                    <View className="flex-row items-center flex-1">
+                        <View className="w-12 h-12 rounded-xl bg-blue-50 items-center justify-center mr-3 border border-blue-100">
+                            <Ionicons name="business" size={24} color="#2563EB" />
+                        </View>
+                        <View className="flex-1">
+                            <Text className="text-lg font-bold text-slate-800" numberOfLines={1}>{item.jobTitle}</Text>
+                            <Text className="text-slate-500 font-medium">{item.company}</Text>
+                        </View>
+                    </View>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: item.status === 'Accepted' ? COLORS.successBg : item.status === 'Rejected' ? COLORS.errorBg : COLORS.warningBg }]}>
-                    <Text style={[styles.statusText, { color: item.status === 'Accepted' ? COLORS.success : item.status === 'Rejected' ? COLORS.error : COLORS.warning }]}>{item.status}</Text>
+
+                {/* Status Badge */}
+                <View className={`flex-row items-center self-start px-3 py-1.5 rounded-full mb-4 ${statusStyle.bg}`}>
+                    <Ionicons name={statusStyle.icon as any} size={14} className={statusStyle.text} />
+                    <Text className={`ml-1.5 text-xs font-bold uppercase tracking-wider ${statusStyle.text}`}>
+                        {item.status}
+                    </Text>
+                </View>
+
+                <View className="flex-row items-center mb-4 space-x-4">
+                    <View className="flex-row items-center">
+                        <Ionicons name="location-outline" size={14} color="#94A3B8" />
+                        <Text className="text-slate-600 ml-1 text-sm">{item.location}</Text>
+                    </View>
+                    <View className="flex-row items-center">
+                        <Ionicons name="cash-outline" size={14} color="#94A3B8" />
+                        <Text className="text-slate-600 ml-1 text-sm">{item.salary}</Text>
+                    </View>
+                </View>
+
+                <View className="flex-row items-center justify-between pt-4 border-t border-slate-100">
+                    <Text className="text-slate-400 text-xs">Applied on {new Date(item.appliedAt).toLocaleDateString()}</Text>
+                    {item.status === 'Pending' && (
+                        <TouchableOpacity
+                            className="bg-red-50 px-3 py-1.5 rounded-lg border border-red-100"
+                            onPress={() => handleWithdraw(item)}
+                        >
+                            <Text className="text-red-600 text-xs font-bold">Withdraw</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
-            <View style={styles.cardDetails}>
-                <View style={styles.detailItem}><Ionicons name="location-outline" size={16} color={COLORS.textSecondary} /><Text style={styles.detailText}>{item.location}</Text></View>
-                <View style={styles.detailItem}><Ionicons name="cash-outline" size={16} color={COLORS.textSecondary} /><Text style={styles.detailText}>{item.salary}</Text></View>
-            </View>
-            <View style={styles.cardFooter}>
-                <Text style={styles.appliedDate}>Applied: {new Date(item.appliedAt).toLocaleDateString()}</Text>
-                {item.status === 'Pending' && (
-                    <TouchableOpacity style={styles.withdrawButton} onPress={() => handleWithdraw(item)}>
-                        <Text style={styles.withdrawText}>Withdraw</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
-        </View>
-    );
+        );
+    };
 
     if (loading) {
-        return <View style={styles.loadingContainer}><ActivityIndicator size="large" color={COLORS.primary} /><Text style={styles.loadingText}>Loading...</Text></View>;
+        return (
+            <View className="flex-1 justify-center items-center bg-slate-50">
+                <ActivityIndicator size="large" color="#2563EB" />
+                <Text className="mt-3 text-slate-500">Loading your applications...</Text>
+            </View>
+        );
     }
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-slate-50">
             <StatusBar barStyle="light-content" />
             <FlatList
                 data={applications}
                 renderItem={renderApplicationCard}
                 keyExtractor={(item) => item.id}
+                contentContainerStyle={{ paddingBottom: 100 }}
+                showsVerticalScrollIndicator={false}
                 ListHeaderComponent={() => (
-                    <LinearGradient colors={[COLORS.gradientStart, COLORS.gradientEnd]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
-                        <Text style={styles.headerTitle}>My Applications</Text>
-                        <Text style={styles.headerSubtitle}>{applications.length} Applications</Text>
-                        <View style={styles.statsRow}>
-                            <View style={styles.statItem}><Text style={styles.statValue}>{applications.filter(a => a.status === 'Pending').length}</Text><Text style={styles.statLabel}>Pending</Text></View>
-                            <View style={styles.statItem}><Text style={styles.statValue}>{applications.filter(a => a.status === 'Accepted').length}</Text><Text style={styles.statLabel}>Accepted</Text></View>
-                            <View style={styles.statItem}><Text style={styles.statValue}>{applications.filter(a => a.status === 'Rejected').length}</Text><Text style={styles.statLabel}>Rejected</Text></View>
+                    <LinearGradient
+                        colors={['#1E40AF', '#7C3AED']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        className="pt-14 pb-8 px-6 rounded-b-[40px] shadow-lg mb-6"
+                    >
+                        <Text className="text-white text-3xl font-bold mb-1">Applications</Text>
+                        <Text className="text-blue-100 text-base mb-6">Track your career progress</Text>
+
+                        <View className="flex-row justify-between bg-white/10 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+                            <View className="items-center flex-1 border-r border-white/10">
+                                <Text className="text-white text-xl font-bold">{applications.filter(a => a.status === 'Pending').length}</Text>
+                                <Text className="text-blue-200 text-xs uppercase font-bold mt-1">Pending</Text>
+                            </View>
+                            <View className="items-center flex-1 border-r border-white/10">
+                                <Text className="text-green-300 text-xl font-bold">{applications.filter(a => a.status === 'Accepted').length}</Text>
+                                <Text className="text-blue-200 text-xs uppercase font-bold mt-1">Accepted</Text>
+                            </View>
+                            <View className="items-center flex-1">
+                                <Text className="text-red-300 text-xl font-bold">{applications.filter(a => a.status === 'Rejected').length}</Text>
+                                <Text className="text-blue-200 text-xs uppercase font-bold mt-1">Rejected</Text>
+                            </View>
                         </View>
                     </LinearGradient>
                 )}
                 ListEmptyComponent={() => (
-                    <View style={styles.emptyContainer}><Ionicons name="document-text-outline" size={60} color={COLORS.textLight} /><Text style={styles.emptyText}>No Applications Yet</Text></View>
+                    <View className="items-center pt-20 px-10">
+                        <View className="w-20 h-20 bg-slate-100 rounded-full items-center justify-center mb-4">
+                            <Ionicons name="document-text-outline" size={40} color="#94A3B8" />
+                        </View>
+                        <Text className="text-xl font-bold text-slate-700 mb-2">No Applications Yet</Text>
+                        <Text className="text-slate-400 text-center">
+                            You haven't applied to any jobs yet. Start exploring and apply to your dream job!
+                        </Text>
+                    </View>
                 )}
-                contentContainerStyle={styles.listContent}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2563EB" />}
             />
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.background },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
-    loadingText: { marginTop: 12, fontSize: SIZES.md, color: COLORS.textSecondary },
-    header: { paddingTop: 50, paddingHorizontal: 20, paddingBottom: 24, borderBottomLeftRadius: 30, borderBottomRightRadius: 30 },
-    headerTitle: { fontSize: 26, fontWeight: '700', color: COLORS.white, marginBottom: 4 },
-    headerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginBottom: 20 },
-    statsRow: { flexDirection: 'row', justifyContent: 'space-between' },
-    statItem: { alignItems: 'center' },
-    statValue: { fontSize: 18, fontWeight: '700', color: COLORS.white },
-    statLabel: { fontSize: 12, color: 'rgba(255,255,255,0.8)' },
-    listContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 },
-    applicationCard: { backgroundColor: COLORS.white, borderRadius: 16, padding: 16, marginBottom: 12, elevation: 3 },
-    cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-    logoContainer: { width: 50, height: 50, borderRadius: 12, backgroundColor: COLORS.infoBg, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-    cardInfo: { flex: 1 },
-    jobTitle: { fontSize: 16, fontWeight: '700', color: COLORS.textPrimary, marginBottom: 2 },
-    companyName: { fontSize: 14, color: COLORS.textSecondary },
-    statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-    statusText: { fontSize: 12, fontWeight: '600' },
-    cardDetails: { flexDirection: 'row', marginBottom: 12 },
-    detailItem: { flexDirection: 'row', alignItems: 'center', marginRight: 20 },
-    detailText: { fontSize: 13, color: COLORS.textSecondary, marginLeft: 4 },
-    cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: 12 },
-    appliedDate: { fontSize: 12, color: COLORS.textSecondary },
-    withdrawButton: { backgroundColor: COLORS.errorBg, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-    withdrawText: { fontSize: 13, fontWeight: '600', color: COLORS.error },
-    emptyContainer: { alignItems: 'center', paddingTop: 60 },
-    emptyText: { fontSize: 20, fontWeight: '600', color: COLORS.textPrimary, marginTop: 16 },
-});
 
 export default AppliedJobsScreen;

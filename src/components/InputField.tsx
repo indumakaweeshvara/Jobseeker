@@ -3,13 +3,12 @@ import {
     View,
     TextInput,
     Text,
-    StyleSheet,
     TouchableOpacity,
     KeyboardTypeOptions,
     ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SIZES } from '../theme/colors';
+import { styled } from 'nativewind';
 
 interface InputFieldProps {
     label?: string;
@@ -22,6 +21,7 @@ interface InputFieldProps {
     error?: string;
     style?: ViewStyle;
     autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+    className?: string;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -35,32 +35,38 @@ const InputField: React.FC<InputFieldProps> = ({
     error,
     style,
     autoCapitalize = 'none',
+    className,
 }) => {
     const [isSecure, setIsSecure] = useState(secureTextEntry);
     const [isFocused, setIsFocused] = useState(false);
 
     return (
-        <View style={[styles.container, style]}>
-            {label && <Text style={styles.label}>{label}</Text>}
+        <View className={`mb-4 ${className}`} style={style}>
+            {label && (
+                <Text className="text-sm font-semibold text-slate-700 mb-2 ml-1">
+                    {label}
+                </Text>
+            )}
             <View
-                style={[
-                    styles.inputContainer,
-                    isFocused && styles.focused,
-                    error && styles.errorBorder,
-                ]}
+                className={`flex-row items-center bg-slate-50 border rounded-2xl px-4 h-[56px] transition-all duration-200 ${error
+                        ? 'border-red-500 bg-red-50/10'
+                        : isFocused
+                            ? 'border-blue-500 bg-white shadow-sm ring-2 ring-blue-100'
+                            : 'border-slate-200'
+                    }`}
             >
                 {icon && (
                     <Ionicons
                         name={icon}
                         size={20}
-                        color={isFocused ? COLORS.primary : COLORS.textSecondary}
-                        style={styles.leftIcon}
+                        color={error ? '#EF4444' : isFocused ? '#2563EB' : '#94A3B8'}
+                        style={{ marginRight: 10 }}
                     />
                 )}
                 <TextInput
-                    style={styles.input}
+                    className="flex-1 text-base text-slate-800 h-full"
                     placeholder={placeholder}
-                    placeholderTextColor={COLORS.textLight}
+                    placeholderTextColor="#94A3B8"
                     value={value}
                     onChangeText={onChangeText}
                     secureTextEntry={isSecure}
@@ -72,69 +78,24 @@ const InputField: React.FC<InputFieldProps> = ({
                 {secureTextEntry && (
                     <TouchableOpacity
                         onPress={() => setIsSecure(!isSecure)}
-                        style={styles.eyeIcon}
+                        className="p-1"
                     >
                         <Ionicons
                             name={isSecure ? 'eye-off-outline' : 'eye-outline'}
                             size={20}
-                            color={COLORS.textSecondary}
+                            color="#94A3B8"
                         />
                     </TouchableOpacity>
                 )}
             </View>
-            {error && <Text style={styles.errorText}>{error}</Text>}
+            {error && (
+                <View className="flex-row items-center mt-1 ml-1">
+                    <Ionicons name="alert-circle-outline" size={14} color="#EF4444" />
+                    <Text className="text-red-500 text-xs ml-1 font-medium">{error}</Text>
+                </View>
+            )}
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        marginBottom: 16,
-    },
-    label: {
-        fontSize: SIZES.md,
-        fontWeight: '600',
-        color: COLORS.textPrimary,
-        marginBottom: 8,
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: COLORS.white,
-        borderRadius: SIZES.radius,
-        borderWidth: 1.5,
-        borderColor: COLORS.border,
-        paddingHorizontal: 14,
-    },
-    focused: {
-        borderColor: COLORS.primary,
-        shadowColor: COLORS.primary,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    errorBorder: {
-        borderColor: COLORS.error,
-    },
-    leftIcon: {
-        marginRight: 10,
-    },
-    input: {
-        flex: 1,
-        paddingVertical: 14,
-        fontSize: SIZES.lg,
-        color: COLORS.textPrimary,
-    },
-    eyeIcon: {
-        padding: 4,
-    },
-    errorText: {
-        color: COLORS.error,
-        fontSize: SIZES.sm,
-        marginTop: 4,
-        marginLeft: 4,
-    },
-});
 
 export default InputField;

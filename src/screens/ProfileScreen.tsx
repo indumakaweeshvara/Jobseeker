@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     ScrollView,
     TouchableOpacity,
     Alert,
     StatusBar,
     ActivityIndicator,
     Image,
-    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +15,6 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { db, storage } from '../services/firebaseConfig';
-import { COLORS, SIZES } from '../theme/colors';
 import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
@@ -39,7 +36,6 @@ const ProfileScreen: React.FC = () => {
         }
     }, [userData]);
 
-    // Request camera permissions
     const requestPermissions = async (): Promise<boolean> => {
         const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
         const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -54,7 +50,6 @@ const ProfileScreen: React.FC = () => {
         return true;
     };
 
-    // Pick image from camera or gallery
     const pickImage = async (useCamera: boolean = false): Promise<void> => {
         const hasPermissions = await requestPermissions();
         if (!hasPermissions) return;
@@ -78,7 +73,6 @@ const ProfileScreen: React.FC = () => {
         }
     };
 
-    // Show image picker options
     const showImageOptions = (): void => {
         Alert.alert(
             'Update Profile Photo',
@@ -91,24 +85,15 @@ const ProfileScreen: React.FC = () => {
         );
     };
 
-    // Upload image to Firebase Storage
     const uploadProfileImage = async (uri: string): Promise<void> => {
         setUploadingImage(true);
         try {
-            // Convert URI to blob
             const response = await fetch(uri);
             const blob = await response.blob();
-
-            // Create storage reference
             const imageRef = ref(storage, `profilePhotos/${user?.uid}`);
-
-            // Upload image
             await uploadBytes(imageRef, blob);
-
-            // Get download URL
             const downloadURL = await getDownloadURL(imageRef);
 
-            // Update Firestore with new profile pic URL
             if (user?.uid) {
                 await updateDoc(doc(db, 'Users', user.uid), {
                     profilePic: downloadURL,
@@ -154,20 +139,10 @@ const ProfileScreen: React.FC = () => {
     };
 
     const handleLogout = (): void => {
-        Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Logout',
-                    style: 'destructive',
-                    onPress: async () => {
-                        await logout();
-                    },
-                },
-            ]
-        );
+        Alert.alert('Logout', 'Are you sure you want to logout?', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Logout', style: 'destructive', onPress: async () => await logout() },
+        ]);
     };
 
     const handleCancel = (): void => {
@@ -177,71 +152,61 @@ const ProfileScreen: React.FC = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <View className="flex-1 bg-slate-50">
             <StatusBar barStyle="light-content" />
 
-            {/* Header */}
+            {/* Premium Header */}
             <LinearGradient
-                colors={[COLORS.gradientStart, COLORS.gradientEnd]}
+                colors={['#1E40AF', '#7C3AED']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={styles.header}
+                className="pt-14 pb-12 px-6 rounded-b-[40px] shadow-lg"
             >
-                <View style={styles.headerContent}>
-                    <Text style={styles.headerTitle}>My Profile</Text>
+                <View className="flex-row justify-between items-center mb-6">
+                    <Text className="text-white text-2xl font-bold">My Profile</Text>
                     {!isEditing && (
                         <TouchableOpacity
-                            style={styles.editButton}
+                            className="w-10 h-10 rounded-full bg-white/20 items-center justify-center backdrop-blur-md"
                             onPress={() => setIsEditing(true)}
                         >
-                            <Ionicons name="pencil" size={18} color={COLORS.white} />
+                            <Ionicons name="pencil" size={20} color="white" />
                         </TouchableOpacity>
                     )}
                 </View>
 
-                {/* Profile Avatar with Photo */}
-                <View style={styles.avatarContainer}>
+                <View className="items-center">
                     <TouchableOpacity
-                        style={styles.avatarWrapper}
+                        className="mb-4 relative"
                         onPress={showImageOptions}
                         disabled={uploadingImage}
                     >
-                        {uploadingImage ? (
-                            <View style={styles.avatar}>
-                                <ActivityIndicator size="large" color={COLORS.primary} />
-                            </View>
-                        ) : profileImage ? (
-                            <Image
-                                source={{ uri: profileImage }}
-                                style={styles.avatarImage}
-                            />
-                        ) : (
-                            <View style={styles.avatar}>
-                                <Text style={styles.avatarText}>
+                        <View className="w-28 h-28 rounded-full border-4 border-white/30 shadow-2xl justify-center items-center overflow-hidden bg-white">
+                            {uploadingImage ? (
+                                <ActivityIndicator size="large" color="#2563EB" />
+                            ) : profileImage ? (
+                                <Image source={{ uri: profileImage }} className="w-full h-full" />
+                            ) : (
+                                <Text className="text-4xl font-bold text-blue-600">
                                     {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
                                 </Text>
-                            </View>
-                        )}
-                        <View style={styles.cameraIcon}>
-                            <Ionicons name="camera" size={16} color={COLORS.white} />
+                            )}
+                        </View>
+                        <View className="absolute bottom-0 right-0 bg-blue-600 w-8 h-8 rounded-full items-center justify-center border-2 border-white shadow-sm">
+                            <Ionicons name="camera" size={14} color="white" />
                         </View>
                     </TouchableOpacity>
-                    <Text style={styles.userName}>{userData?.name || 'User'}</Text>
-                    <Text style={styles.userEmail}>{userData?.email || user?.email}</Text>
-                    <Text style={styles.tapHint}>Tap photo to change</Text>
+                    <Text className="text-2xl font-bold text-white mb-1">{userData?.name || 'User'}</Text>
+                    <Text className="text-blue-100 text-sm">{userData?.email || user?.email}</Text>
                 </View>
             </LinearGradient>
 
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContent}
-            >
-                {/* Profile Info Card */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Personal Information</Text>
+            <ScrollView showsVerticalScrollIndicator={false} className="flex-1 px-6 pt-6 mb-10">
+                {/* Info Card */}
+                <View className="bg-white rounded-3xl p-6 shadow-md shadow-slate-200 mb-6">
+                    <Text className="text-lg font-bold text-slate-800 mb-4">Personal Information</Text>
 
                     {isEditing ? (
-                        <>
+                        <View>
                             <InputField
                                 label="Full Name"
                                 placeholder="Enter your name"
@@ -258,290 +223,69 @@ const ProfileScreen: React.FC = () => {
                                 keyboardType="phone-pad"
                                 icon="call-outline"
                             />
-                            <View style={styles.buttonRow}>
-                                <CustomButton
-                                    title="Cancel"
-                                    onPress={handleCancel}
-                                    type="outline"
-                                    style={styles.cancelButton}
-                                />
-                                <CustomButton
-                                    title="Save"
-                                    onPress={handleSave}
-                                    type="gradient"
-                                    loading={loading}
-                                    style={styles.saveButton}
-                                />
+                            <View className="flex-row mt-2">
+                                <View className="flex-1 mr-2">
+                                    <CustomButton title="Cancel" onPress={handleCancel} type="outline" />
+                                </View>
+                                <View className="flex-1 ml-2">
+                                    <CustomButton title="Save" onPress={handleSave} type="gradient" loading={loading} />
+                                </View>
                             </View>
-                        </>
+                        </View>
                     ) : (
-                        <>
-                            <View style={styles.infoItem}>
-                                <Ionicons name="person-outline" size={22} color={COLORS.primary} />
-                                <View style={styles.infoContent}>
-                                    <Text style={styles.infoLabel}>Full Name</Text>
-                                    <Text style={styles.infoValue}>{userData?.name || 'Not set'}</Text>
+                        <View className="space-y-4">
+                            {[
+                                { label: 'Full Name', value: userData?.name, icon: 'person-outline' },
+                                { label: 'Email', value: userData?.email || user?.email, icon: 'mail-outline' },
+                                { label: 'Phone', value: userData?.phone || 'Not set', icon: 'call-outline' },
+                            ].map((item, index) => (
+                                <View key={index} className="flex-row items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                    <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mr-3">
+                                        <Ionicons name={item.icon as any} size={20} color="#2563EB" />
+                                    </View>
+                                    <View>
+                                        <Text className="text-xs text-slate-500 font-medium">{item.label}</Text>
+                                        <Text className="text-base text-slate-800 font-semibold">{item.value}</Text>
+                                    </View>
                                 </View>
-                            </View>
-                            <View style={styles.infoItem}>
-                                <Ionicons name="mail-outline" size={22} color={COLORS.primary} />
-                                <View style={styles.infoContent}>
-                                    <Text style={styles.infoLabel}>Email</Text>
-                                    <Text style={styles.infoValue}>{userData?.email || user?.email}</Text>
-                                </View>
-                            </View>
-                            <View style={styles.infoItem}>
-                                <Ionicons name="call-outline" size={22} color={COLORS.primary} />
-                                <View style={styles.infoContent}>
-                                    <Text style={styles.infoLabel}>Phone</Text>
-                                    <Text style={styles.infoValue}>{userData?.phone || 'Not set'}</Text>
-                                </View>
-                            </View>
-                        </>
+                            ))}
+                        </View>
                     )}
                 </View>
 
                 {/* Settings Card */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Settings</Text>
-
-                    <TouchableOpacity style={styles.settingItem}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.settingIcon, { backgroundColor: COLORS.infoBg }]}>
-                                <Ionicons name="notifications-outline" size={20} color={COLORS.info} />
+                <View className="bg-white rounded-3xl p-6 shadow-md shadow-slate-200 mb-8">
+                    <Text className="text-lg font-bold text-slate-800 mb-4">Settings</Text>
+                    {[
+                        { label: 'Notifications', icon: 'notifications-outline', color: 'bg-blue-100', iconColor: '#2563EB' },
+                        { label: 'Privacy & Security', icon: 'shield-checkmark-outline', color: 'bg-green-100', iconColor: '#16A34A' },
+                        { label: 'Help & Support', icon: 'help-circle-outline', color: 'bg-amber-100', iconColor: '#D97706' },
+                    ].map((item, index) => (
+                        <TouchableOpacity key={index} className="flex-row items-center justify-between py-3 border-b border-slate-50 last:border-0">
+                            <View className="flex-row items-center">
+                                <View className={`w-10 h-10 rounded-xl ${item.color} items-center justify-center mr-3`}>
+                                    <Ionicons name={item.icon as any} size={20} color={item.iconColor} />
+                                </View>
+                                <Text className="text-base font-semibold text-slate-800">{item.label}</Text>
                             </View>
-                            <Text style={styles.settingText}>Notifications</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.settingItem}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.settingIcon, { backgroundColor: COLORS.warningBg }]}>
-                                <Ionicons name="lock-closed-outline" size={20} color={COLORS.warning} />
-                            </View>
-                            <Text style={styles.settingText}>Privacy</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.settingItem}>
-                        <View style={styles.settingLeft}>
-                            <View style={[styles.settingIcon, { backgroundColor: COLORS.successBg }]}>
-                                <Ionicons name="help-circle-outline" size={20} color={COLORS.success} />
-                            </View>
-                            <Text style={styles.settingText}>Help & Support</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
-                    </TouchableOpacity>
+                            <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
+                        </TouchableOpacity>
+                    ))}
                 </View>
 
                 {/* Logout Button */}
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Ionicons name="log-out-outline" size={22} color={COLORS.error} />
-                    <Text style={styles.logoutText}>Logout</Text>
+                <TouchableOpacity
+                    className="flex-row items-center justify-center bg-red-50 p-4 rounded-2xl border border-red-100 mb-8 active:bg-red-100"
+                    onPress={handleLogout}
+                >
+                    <Ionicons name="log-out-outline" size={24} color="#EF4444" />
+                    <Text className="ml-2 text-lg font-bold text-red-500">Log Out</Text>
                 </TouchableOpacity>
 
-                {/* App Version */}
-                <Text style={styles.version}>JobSeeker v1.0.0</Text>
+                <Text className="text-center text-slate-400 text-xs mb-10">JobSeeker App v1.0.0</Text>
             </ScrollView>
         </View>
     );
 };
-
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    header: {
-        paddingTop: 50,
-        paddingHorizontal: 20,
-        paddingBottom: 40,
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-    },
-    headerContent: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    headerTitle: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: COLORS.white,
-    },
-    editButton: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    avatarContainer: {
-        alignItems: 'center',
-    },
-    avatarWrapper: {
-        position: 'relative',
-        marginBottom: 12,
-    },
-    avatar: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        backgroundColor: COLORS.white,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    avatarImage: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        borderWidth: 3,
-        borderColor: COLORS.white,
-    },
-    cameraIcon: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: COLORS.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: COLORS.white,
-    },
-    avatarText: {
-        fontSize: 36,
-        fontWeight: '700',
-        color: COLORS.primary,
-    },
-    userName: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: COLORS.white,
-        marginBottom: 4,
-    },
-    userEmail: {
-        fontSize: 14,
-        color: 'rgba(255, 255, 255, 0.8)',
-    },
-    tapHint: {
-        fontSize: 12,
-        color: 'rgba(255, 255, 255, 0.6)',
-        marginTop: 4,
-    },
-    scrollContent: {
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 40,
-    },
-    card: {
-        backgroundColor: COLORS.white,
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 16,
-        shadowColor: COLORS.shadow,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: COLORS.textPrimary,
-        marginBottom: 16,
-    },
-    infoItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
-    },
-    infoContent: {
-        marginLeft: 14,
-        flex: 1,
-    },
-    infoLabel: {
-        fontSize: 12,
-        color: COLORS.textSecondary,
-        marginBottom: 2,
-    },
-    infoValue: {
-        fontSize: 15,
-        fontWeight: '500',
-        color: COLORS.textPrimary,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        marginTop: 8,
-    },
-    cancelButton: {
-        flex: 1,
-        marginRight: 8,
-    },
-    saveButton: {
-        flex: 1,
-        marginLeft: 8,
-    },
-    settingItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
-    },
-    settingLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    settingIcon: {
-        width: 38,
-        height: 38,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    settingText: {
-        fontSize: 15,
-        color: COLORS.textPrimary,
-        fontWeight: '500',
-    },
-    logoutButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: COLORS.errorBg,
-        padding: 16,
-        borderRadius: 14,
-        marginTop: 8,
-    },
-    logoutText: {
-        marginLeft: 8,
-        fontSize: 16,
-        fontWeight: '600',
-        color: COLORS.error,
-    },
-    version: {
-        textAlign: 'center',
-        fontSize: 12,
-        color: COLORS.textSecondary,
-        marginTop: 24,
-    },
-});
 
 export default ProfileScreen;
