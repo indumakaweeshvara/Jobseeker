@@ -10,13 +10,13 @@ import {
     StatusBar,
     Image,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
 import { LoginScreenNavigationProp } from '../types';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface FormErrors {
     email?: string;

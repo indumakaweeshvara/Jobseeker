@@ -10,6 +10,7 @@ import {
     StatusBar,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
 import { Ionicons } from '@expo/vector-icons';
 import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
@@ -28,7 +29,7 @@ interface SignupScreenProps {
     navigation: SignupScreenNavigationProp;
 }
 
-const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }) => {
+const SignupScreen: React.FC<SignupScreenProps> = ({ navigation }: SignupScreenProps) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');

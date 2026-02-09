@@ -7,7 +7,11 @@ import {
     TextStyle,
     View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+// import { styled } from 'nativewind';
+import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
+
+
+const LinearGradient = styled(ExpoLinearGradient);
 
 interface CustomButtonProps {
     title: string;

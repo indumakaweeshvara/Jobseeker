@@ -49,10 +49,10 @@ const InputField: React.FC<InputFieldProps> = ({
             )}
             <View
                 className={`flex-row items-center bg-slate-50 border rounded-2xl px-4 h-[56px] transition-all duration-200 ${error
-                        ? 'border-red-500 bg-red-50/10'
-                        : isFocused
-                            ? 'border-blue-500 bg-white shadow-sm ring-2 ring-blue-100'
-                            : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50/10'
+                    : isFocused
+                        ? 'border-blue-500 bg-white shadow-sm ring-2 ring-blue-100'
+                        : 'border-slate-200'
                     }`}
             >
                 {icon && (

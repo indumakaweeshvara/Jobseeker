@@ -1,12 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-    View, Text, FlatList, RefreshControl, TextInput,
-    TouchableOpacity, StatusBar, ActivityIndicator, Alert, ListRenderItem,
-    Image,
+    View,
+    Text,
+    FlatList,
+    RefreshControl,
+    TextInput,
+    TouchableOpacity,
+    StatusBar,
+    ActivityIndicator,
+    Alert,
+    ListRenderItem,
     ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 import JobCard from '../components/JobCard';
@@ -34,7 +42,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             const jobsRef = collection(db, 'Jobs');
             const snapshot = await getDocs(jobsRef);
             const jobsList: Job[] = snapshot.docs.map(doc => ({
-                id: doc.id, ...doc.data()
+                id: doc.id,
+                ...doc.data()
             } as Job));
             setJobs(jobsList);
             setFilteredJobs(jobsList);
@@ -50,7 +59,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     useEffect(() => {
         let result = jobs;
 
-        // Filter by Search
         if (searchQuery) {
             result = result.filter(job =>
                 job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -59,10 +67,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             );
         }
 
-        // Filter by Category (Mock logic since jobs might not have category field yet)
         if (activeCategory !== 'All') {
-            // In a real app, you would filter by job.category
-            // For now just showing all or simple mock filtering
+            // Filter by category logic here if available
         }
 
         setFilteredJobs(result);
@@ -88,15 +94,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             } else {
                 Alert.alert('Error', result.error || 'Failed');
             }
-        } catch { Alert.alert('Error', 'Failed to add jobs'); }
-        finally { setLoading(false); }
+        } catch {
+            Alert.alert('Error', 'Failed to add jobs');
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (loading) {
         return (
             <View className="flex-1 justify-center items-center bg-slate-50">
                 <ActivityIndicator size="large" color="#2563EB" />
-                <Text className="mt-4 text-slate-500 font-medium">Finding your next career...</Text>
+                <Text className="mt-4 text-slate-500 font-medium">
+                    Finding your next career...
+                </Text>
             </View>
         );
     }
@@ -123,11 +134,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                                 shadowRadius: 16,
                             }}
                         >
-                            {/* Header Top Row */}
+                            {/* Header */}
                             <View className="flex-row justify-between items-center mb-6">
                                 <View>
                                     <Text className="text-blue-100 text-base font-medium">Good Morning,</Text>
-                                    <Text className="text-white text-2xl font-bold">{userData?.name || 'Job Seeker'} 👋</Text>
+                                    <Text className="text-white text-2xl font-bold">
+                                        {userData?.name || 'Job Seeker'} 👋
+                                    </Text>
                                 </View>
                                 <TouchableOpacity className="w-12 h-12 bg-white/20 rounded-2xl items-center justify-center backdrop-blur-md border border-white/10">
                                     <View className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#7C3AED]" />
@@ -167,7 +180,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                             </View>
                         </LinearGradient>
 
-                        {/* Categories ScrollView */}
+                        {/* Categories */}
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
@@ -178,13 +191,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                                 <TouchableOpacity
                                     key={index}
                                     onPress={() => setActiveCategory(cat)}
-                                    className={`mr-3 px-5 py-2.5 rounded-full border ${activeCategory === cat
+                                    className={`mr-3 px-5 py-2.5 rounded-full border ${
+                                        activeCategory === cat
                                             ? 'bg-blue-600 border-blue-600 shadow-md shadow-blue-500/30'
                                             : 'bg-white border-slate-200'
-                                        }`}
+                                    }`}
                                 >
-                                    <Text className={`font-semibold text-sm ${activeCategory === cat ? 'text-white' : 'text-slate-500'
-                                        }`}>
+                                    <Text
+                                        className={`font-semibold text-sm ${
+                                            activeCategory === cat ? 'text-white' : 'text-slate-500'
+                                        }`}
+                                    >
                                         {cat}
                                     </Text>
                                 </TouchableOpacity>
