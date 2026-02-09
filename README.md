@@ -76,28 +76,35 @@ Scan the QR code with Expo Go app (iOS/Android)
 
 ```
 JobSeekerApp/
+├── app/
+│   └── index.tsx          # Entry Point
 ├── src/
-│   ├── assets/          # Images & Icons
-│   ├── components/      # Reusable UI Components
-│   │   ├── CustomButton.js
-│   │   ├── InputField.js
-│   │   └── JobCard.js
-│   ├── context/         # Global State Management
-│   │   └── AuthContext.js
-│   ├── navigation/      # Navigation Configuration
-│   │   └── AppNavigator.js
-│   ├── screens/         # App Screens
-│   │   ├── LoginScreen.js
-│   │   ├── SignupScreen.js
-│   │   ├── HomeScreen.js
-│   │   ├── JobDetailScreen.js
-│   │   ├── AppliedJobsScreen.js
-│   │   └── ProfileScreen.js
-│   ├── services/        # Firebase Config
-│   │   └── firebaseConfig.js
-│   └── theme/           # App Styling
-│       └── colors.js
-├── App.js               # Main Entry Point
+│   ├── assets/            # Images & Icons
+│   ├── components/        # Reusable UI Components
+│   │   ├── CustomButton.tsx
+│   │   ├── InputField.tsx
+│   │   └── JobCard.tsx
+│   ├── context/           # Global State Management
+│   │   └── AuthContext.tsx
+│   ├── navigation/        # Navigation Configuration
+│   │   └── AppNavigator.tsx
+│   ├── screens/           # App Screens
+│   │   ├── LoginScreen.tsx
+│   │   ├── SignupScreen.tsx
+│   │   ├── HomeScreen.tsx
+│   │   ├── JobDetailScreen.tsx
+│   │   ├── AppliedJobsScreen.tsx
+│   │   └── ProfileScreen.tsx
+│   ├── services/          # Firebase & API Services
+│   │   ├── firebaseConfig.ts
+│   │   ├── firestoreActions.ts
+│   │   └── seedData.ts
+│   ├── theme/             # App Styling
+│   │   └── colors.ts
+│   └── types/             # TypeScript Interfaces
+│       └── index.ts
+├── tailwind.config.js     # NativeWind Configuration
+├── tsconfig.json          # TypeScript Configuration
 └── package.json
 ```
 
