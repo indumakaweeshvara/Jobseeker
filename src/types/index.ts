@@ -5,35 +5,70 @@ import { RouteProp } from '@react-navigation/native';
 // Firebase Models
 // ============================================
 
+/**
+ * Represents a job listing in the application
+ * @interface Job
+ */
 export interface Job {
+    /** Unique identifier for the job */
     id: string;
+    /** Job position title */
     title: string;
+    /** Company offering the position */
     company: string;
+    /** Job location (city/country or remote) */
     location: string;
+    /** Salary range or amount */
     salary: string;
+    /** Detailed job description */
     description: string;
+    /** List of job requirements */
     requirements?: string[];
+    /** List of job responsibilities */
     responsibilities?: string[];
+    /** List of job benefits */
     benefits?: string[];
+    /** Date when job was posted */
     postedDate?: string;
-    type?: string; // e.g., 'full-time', 'part-time', 'contract'
+    /** Employment type: 'full-time', 'part-time', 'contract' */
+    type?: string;
 }
 
+/**
+ * Represents a registered user in the application
+ * @interface User
+ */
 export interface User {
+    /** Firebase user unique identifier */
     uid: string;
+    /** User's full name */
     name: string;
+    /** User's email address */
     email: string;
+    /** User's phone number */
     phone: string;
+    /** URL to user's profile picture */
     profilePic: string;
+    /** Account creation timestamp */
     createdAt: string;
 }
 
+/**
+ * Represents a job application submitted by a user
+ * @interface Application
+ */
 export interface Application {
+    /** Unique application identifier */
     id: string;
+    /** Reference to the applied job */
     jobId: string;
+    /** Reference to the applicant user */
     userId: string;
+    /** The job details */
     job: Job;
+    /** Current status of the application */
     status: 'Pending' | 'Accepted' | 'Rejected';
+    /** Date when application was submitted */
     appliedDate: string;
 }
 
