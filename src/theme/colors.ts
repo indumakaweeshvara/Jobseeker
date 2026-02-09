@@ -1,4 +1,12 @@
-// Professional Color Palette for JobSeeker App
+/**
+ * Professional Color Palette for JobSeeker App
+ * @module theme/colors
+ * @description Defines the core color system used throughout the application
+ */
+
+/** Color palette type definition */
+export type ColorKey = keyof typeof COLORS;
+
 export const COLORS = {
     // Primary Colors
     primary: '#2563EB',
