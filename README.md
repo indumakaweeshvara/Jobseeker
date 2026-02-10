@@ -1,27 +1,33 @@
 # JobSeeker App
 
-A professional job seeking mobile application built with React Native/Expo and Firebase.
+A professional job seeking mobile application built with React Native/Expo and Firebase, now featuring full Dark Mode support and advanced job discovery tools.
 
 ## 📱 Features
 
 - **User Authentication**: Secure login and signup with Firebase Auth
-- **Job Listings**: Browse available jobs with search functionality
-- **Job Applications**: Apply to jobs with one tap
-- **Application Tracking**: View and manage your job applications
-- **Profile Management**: Update your personal information
+- **Full Dark Mode**: Professional dark and light theme support with dynamic switching
+- **Job Listings**: Browse available jobs with search and category filtering
+- **Popular Jobs**: Discover featured opportunities in a dedicated horizontal scroll section
+- **Job Details**: Comprehensive job information with market salary insights
+- **Job Sharing**: Share interesting opportunities via system share dialog
+- **Bookmarking**: Save jobs for later review in a dedicated "Saved" tab
+- **Job Applications**: Apply to jobs and track your application status
+- **Profile Management**: Update personal info and upload profile pictures
+- **Skeleton Screens**: Premium shimmering loading experience across all major screens
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React Native with Expo
+- **Frontend**: React Native with Expo (SDK 54)
 - **Backend**: Firebase (Authentication + Cloud Firestore)
 - **Navigation**: React Navigation (Stack + Bottom Tabs)
-- **UI**: Custom components with gradient designs
+- **Theme**: Custom Theme Engine with `ThemeContext`
+- **UI**: Custom components with gradient designs and accessibility focus
 
 ## 📋 Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
+- Expo CLI
 - Firebase account
 
 ## 🚀 Getting Started
@@ -41,36 +47,13 @@ npm install
 1. Create a new project at [Firebase Console](https://console.firebase.google.com/)
 2. Enable **Authentication** → Email/Password
 3. Enable **Cloud Firestore**
-4. Get your config from Project Settings → Your apps
-5. Update `src/services/firebaseConfig.js` with your credentials:
-```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-```
+4. Update `src/services/firebaseConfig.ts` with your credentials
 
-### 4. Add Sample Jobs to Firestore
-In Firebase Console → Firestore, create a `Jobs` collection with documents:
-```json
-{
-  "title": "Software Engineer",
-  "company": "Tech Corp",
-  "location": "Colombo, Sri Lanka",
-  "salary": "LKR 150,000",
-  "description": "We are looking for a skilled software engineer..."
-}
-```
-
-### 5. Run the App
+### 4. Run the App
 ```bash
 npx expo start
 ```
-Scan the QR code with Expo Go app (iOS/Android)
+Scan the QR code with Expo Go app (iOS/Android) or press `w` for web.
 
 ## 📁 Project Structure
 
@@ -79,62 +62,40 @@ JobSeekerApp/
 ├── app/
 │   └── index.tsx          # Entry Point
 ├── src/
-│   ├── assets/            # Images & Icons
-│   ├── components/        # Reusable UI Components
+│   ├── components/        # Reusable UI & Skeleton Components
 │   │   ├── CustomButton.tsx
 │   │   ├── InputField.tsx
-│   │   └── JobCard.tsx
-│   ├── context/           # Global State Management
-│   │   └── AuthContext.tsx
-│   ├── navigation/        # Navigation Configuration
+│   │   ├── JobCard.tsx
+│   │   └── Skeleton.tsx
+│   ├── context/           # Global State (Auth & Theme)
+│   │   ├── AuthContext.tsx
+│   │   └── ThemeContext.tsx
+│   ├── navigation/        # Navigation Logic
 │   │   └── AppNavigator.tsx
-│   ├── screens/           # App Screens
+│   ├── screens/           # Feature Screens
 │   │   ├── LoginScreen.tsx
 │   │   ├── SignupScreen.tsx
 │   │   ├── HomeScreen.tsx
 │   │   ├── JobDetailScreen.tsx
 │   │   ├── AppliedJobsScreen.tsx
+│   │   ├── SavedJobsScreen.tsx
 │   │   └── ProfileScreen.tsx
-│   ├── services/          # Firebase & API Services
+│   ├── services/          # Services & Data Seeding
 │   │   ├── firebaseConfig.ts
-│   │   ├── firestoreActions.ts
 │   │   └── seedData.ts
-│   ├── theme/             # App Styling
+│   ├── theme/             # Design System Tokens
 │   │   └── colors.ts
-│   └── types/             # TypeScript Interfaces
-│       └── index.ts
-├── tailwind.config.js     # NativeWind Configuration
-├── tsconfig.json          # TypeScript Configuration
-└── package.json
+│   └── types/             # TypeScript Definitions
 ```
 
 ## 🔥 Firebase Collections
 
-| Collection | Fields |
-|------------|--------|
-| Users | uid, name, email, phone, profilePic, createdAt |
-| Jobs | title, company, location, salary, description |
-| Applications | appId, jobId, userId, jobTitle, company, status, appliedAt |
-
-## 📲 Build APK
-
-```bash
-# Install EAS CLI
-npm install -g eas-cli
-
-# Login to Expo
-eas login
-
-# Build preview APK
-eas build -p android --profile preview
-```
-
-## 📝 CRUD Operations
-
-1. **CREATE**: Apply for a job → Creates record in Applications collection
-2. **READ**: View job listings, applications, and profile data
-3. **UPDATE**: Edit profile name and phone number
-4. **DELETE**: Withdraw job application
+| Collection | Description |
+|------------|-------------|
+| **Users** | Core user data, profile info, and roles |
+| **Jobs** | Job listings, requirements, and company data |
+| **Applications** | User-Job interaction tracking |
+| **SavedJobs** | User's bookmarked job listings |
 
 ## 👨‍💻 Author
 

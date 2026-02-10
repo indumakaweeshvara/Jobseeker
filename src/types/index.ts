@@ -22,16 +22,24 @@ export interface Job {
     salary: string;
     /** Detailed job description */
     description: string;
+    /** Job category (Development, Design, etc.) */
+    category?: string;
+    /** Job type (Full-time, Part-time, Remote, etc.) */
+    type?: string;
+    /** Experience level (Junior, Mid-Level, Senior, Entry) */
+    level?: string;
     /** List of job requirements */
     requirements?: string[];
     /** List of job responsibilities */
     responsibilities?: string[];
     /** List of job benefits */
     benefits?: string[];
-    /** Date when job was posted */
+    /** Date when job was posted (ISO string) */
+    postedAt?: string;
+    /** URL to company logo image */
+    companyLogo?: string;
+    /** Legacy: Date when job was posted */
     postedDate?: string;
-    /** Employment type: 'full-time', 'part-time', 'contract' */
-    type?: string;
 }
 
 /**
@@ -49,6 +57,12 @@ export interface User {
     phone: string;
     /** URL to user's profile picture */
     profilePic: string;
+    /** URL to user's resume PDF */
+    resumeUrl?: string;
+    /** Filename of the uploaded resume */
+    resumeName?: string;
+    /** List of user skills */
+    skills?: string[];
     /** Account creation timestamp */
     createdAt: string;
 }
@@ -67,7 +81,7 @@ export interface Application {
     /** The job details */
     job: Job;
     /** Current status of the application */
-    status: 'Pending' | 'Accepted' | 'Rejected';
+    status: 'Pending' | 'Reviewing' | 'Interviewing' | 'Decision' | 'Accepted' | 'Rejected';
     /** Date when application was submitted */
     appliedDate: string;
 }
@@ -84,13 +98,14 @@ export type RootStackParamList = {
 
 export type MainTabParamList = {
     Home: undefined;
+    Saved: undefined;
     AppliedJobs: undefined;
     Profile: undefined;
 };
 
 export type HomeStackParamList = {
     HomeScreen: undefined;
-    JobDetail: { job: Job };
+    JobDetail: { jobId: string };
 };
 
 // Navigation Props
@@ -99,6 +114,15 @@ export type SignupScreenNavigationProp = StackNavigationProp<RootStackParamList,
 export type HomeScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'HomeScreen'>;
 export type JobDetailScreenNavigationProp = StackNavigationProp<HomeStackParamList, 'JobDetail'>;
 export type JobDetailScreenRouteProp = RouteProp<HomeStackParamList, 'JobDetail'>;
+
+export interface HomeScreenProps {
+    navigation: HomeScreenNavigationProp;
+}
+
+export interface JobDetailScreenProps {
+    route: JobDetailScreenRouteProp;
+    navigation: JobDetailScreenNavigationProp;
+}
 
 // ============================================
 // Component Props

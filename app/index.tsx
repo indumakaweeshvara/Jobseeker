@@ -1,14 +1,17 @@
-import React from 'react';
-import { StatusBar } from 'react-native';
-import { AuthProvider } from '../src/context/AuthContext';
+import React, { useEffect } from 'react';
+import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
 import AppNavigator from '../src/navigation/AppNavigator';
-import '../global.css';
 
 export default function App() {
+  useEffect(() => {
+    console.log('App: index.tsx loaded');
+  }, []);
+
   return (
-    <AuthProvider>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-      <AppNavigator />
-    </AuthProvider>
+    <NavigationIndependentTree>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </NavigationIndependentTree>
   );
 }

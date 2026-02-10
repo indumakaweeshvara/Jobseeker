@@ -8,15 +8,15 @@ import {
     TouchableOpacity,
     Alert,
     StatusBar,
-    Image,
+    StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import InputField from '../components/InputField';
 import CustomButton from '../components/CustomButton';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { LoginScreenNavigationProp } from '../types';
-import { LinearGradient } from 'expo-linear-gradient';
 
 interface FormErrors {
     email?: string;
@@ -32,8 +32,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<FormErrors>({});
+    const [statusMessage, setStatusMessage] = useState('');
 
     const { login } = useAuth();
+    const { colors, isDark } = useTheme();
 
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {};
@@ -55,19 +57,33 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     };
 
     const handleLogin = async (): Promise<void> => {
-        if (!validateForm()) return;
+        setStatusMessage('');
+        if (!validateForm()) {
+            setStatusMessage('⚠️ Please fill in all fields correctly');
+            return;
+        }
 
+        setStatusMessage('🔄 Signing in...');
         setLoading(true);
-        const result = await login(email, password);
-        setLoading(false);
+        try {
+            const result = await login(email.trim(), password);
+            setLoading(false);
 
-        if (!result.success) {
-            Alert.alert('Login Failed', result.error);
+            if (!result.success) {
+                setStatusMessage(`❌ ${result.error || 'Login failed'}`);
+                Alert.alert('Login Failed', result.error || 'Unknown error');
+            } else {
+                setStatusMessage('✅ Login successful! Redirecting...');
+            }
+        } catch (err: any) {
+            setLoading(false);
+            setStatusMessage(`❌ ${err.message || 'Something went wrong'}`);
+            Alert.alert('Login Error', err.message || 'Something went wrong');
         }
     };
 
     return (
-        <View className="flex-1 bg-slate-50">
+        <View style={styles.container}>
             <StatusBar barStyle="light-content" />
 
             {/* Animated Background with Gradient */}
@@ -75,64 +91,46 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 colors={['#1E40AF', '#7C3AED', '#DB2777']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="h-80 justify-center items-center"
-                style={{
-                    borderBottomLeftRadius: 50,
-                    borderBottomRightRadius: 50,
-                }}
+                style={styles.header}
             >
                 {/* Floating Circles for Visual Effect */}
-                <View className="absolute top-10 left-5 w-24 h-24 rounded-full bg-white/10" />
-                <View className="absolute top-32 right-8 w-16 h-16 rounded-full bg-white/10" />
-                <View className="absolute bottom-20 left-20 w-12 h-12 rounded-full bg-white/15" />
+                <View style={[styles.floatingCircle, { top: 40, left: 20, width: 96, height: 96 }]} />
+                <View style={[styles.floatingCircle, { top: 128, right: 32, width: 64, height: 64 }]} />
+                <View style={[styles.floatingCircle, { bottom: 80, left: 80, width: 48, height: 48, backgroundColor: 'rgba(255,255,255,0.15)' }]} />
 
-                {/* Logo Container with Glassmorphism Effect */}
-                <View className="w-28 h-28 rounded-3xl bg-white/20 justify-center items-center mb-4 shadow-2xl"
-                    style={{
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 10 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 20,
-                    }}
-                >
-                    <View className="w-20 h-20 rounded-2xl bg-white justify-center items-center">
-                        <Ionicons name="briefcase" size={45} color="#2563EB" />
+                {/* Logo Container */}
+                <View style={styles.logoOuter}>
+                    <View style={styles.logoInner}>
+                        <Ionicons name="briefcase" size={45} color={colors.primary} />
                     </View>
                 </View>
-                <Text className="text-4xl font-bold text-white mb-2 tracking-wider">
-                    JobSeeker
-                </Text>
-                <Text className="text-base text-white/80 font-medium">
-                    Your Dream Career Awaits ✨
-                </Text>
+                <Text style={styles.appTitle}>JobSeeker</Text>
+                <Text style={[styles.appSubtitle, { color: 'rgba(255,255,255,0.8)' }]}>Your Dream Career Awaits ✨</Text>
             </LinearGradient>
 
-            {/* Form Container with Modern Card Design */}
+            {/* Form Container */}
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                className="flex-1 -mt-8"
+                style={styles.formWrapper}
             >
                 <ScrollView
                     contentContainerStyle={{ flexGrow: 1 }}
                     showsVerticalScrollIndicator={false}
                 >
-                    <View className="flex-1 bg-white rounded-t-[40px] px-7 pt-10 pb-8"
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: -10 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 20,
-                            elevation: 20,
-                        }}
-                    >
-                        <Text className="text-3xl font-bold text-slate-800 mb-2">
-                            Welcome Back! 👋
-                        </Text>
-                        <Text className="text-base text-slate-500 mb-8">
+                    <View style={[styles.formCard, { backgroundColor: colors.card }]}>
+                        <Text style={[styles.welcomeTitle, { color: colors.textPrimary }]}>Welcome Back! 👋</Text>
+                        <Text style={[styles.welcomeSubtitle, { color: colors.textSecondary }]}>
                             Sign in to continue your journey
                         </Text>
 
-                        {/* Email Input with Icon */}
+                        {/* Status Message */}
+                        {statusMessage ? (
+                            <View style={{ backgroundColor: isDark ? colors.background : '#FFF8E1', padding: 12, borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: isDark ? colors.border : '#FFE082' }}>
+                                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary, textAlign: 'center' }}>{statusMessage}</Text>
+                            </View>
+                        ) : null}
+
+                        {/* Email Input */}
                         <InputField
                             label="Email Address"
                             placeholder="Enter your email"
@@ -143,7 +141,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             error={errors.email}
                         />
 
-                        {/* Password Input with Icon */}
+                        {/* Password Input */}
                         <InputField
                             label="Password"
                             placeholder="Enter your password"
@@ -154,14 +152,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                             error={errors.password}
                         />
 
-                        {/* Forgot Password Link */}
-                        <TouchableOpacity className="self-end mb-6">
-                            <Text className="text-blue-600 text-sm font-semibold">
-                                Forgot Password?
-                            </Text>
+                        {/* Forgot Password */}
+                        <TouchableOpacity style={styles.forgotPassword}>
+                            <Text style={[styles.forgotPasswordText, { color: colors.primary }]}>Forgot Password?</Text>
                         </TouchableOpacity>
 
-                        {/* Login Button with Gradient */}
+                        {/* Login Button */}
                         <CustomButton
                             title="Sign In"
                             onPress={handleLogin}
@@ -170,60 +166,30 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                         />
 
                         {/* Divider */}
-                        <View className="flex-row items-center my-8">
-                            <View className="flex-1 h-px bg-slate-200" />
-                            <Text className="mx-4 text-slate-400 text-sm font-medium">
-                                OR
-                            </Text>
-                            <View className="flex-1 h-px bg-slate-200" />
+                        <View style={styles.divider}>
+                            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+                            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>OR</Text>
+                            <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
                         </View>
 
                         {/* Social Login Buttons */}
-                        <View className="flex-row justify-center gap-4 mb-6">
-                            <TouchableOpacity className="w-14 h-14 rounded-2xl bg-slate-100 items-center justify-center"
-                                style={{
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.1,
-                                    shadowRadius: 5,
-                                    elevation: 3,
-                                }}
-                            >
+                        <View style={styles.socialRow}>
+                            <TouchableOpacity style={[styles.socialButton, { backgroundColor: isDark ? colors.background : '#F8FAFC' }]}>
                                 <Ionicons name="logo-google" size={24} color="#EA4335" />
                             </TouchableOpacity>
-                            <TouchableOpacity className="w-14 h-14 rounded-2xl bg-slate-100 items-center justify-center"
-                                style={{
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.1,
-                                    shadowRadius: 5,
-                                    elevation: 3,
-                                }}
-                            >
-                                <Ionicons name="logo-apple" size={24} color="#000" />
+                            <TouchableOpacity style={[styles.socialButton, { backgroundColor: isDark ? colors.background : '#F8FAFC' }]}>
+                                <Ionicons name="logo-apple" size={24} color={isDark ? '#FFF' : '#000'} />
                             </TouchableOpacity>
-                            <TouchableOpacity className="w-14 h-14 rounded-2xl bg-slate-100 items-center justify-center"
-                                style={{
-                                    shadowColor: '#000',
-                                    shadowOffset: { width: 0, height: 2 },
-                                    shadowOpacity: 0.1,
-                                    shadowRadius: 5,
-                                    elevation: 3,
-                                }}
-                            >
+                            <TouchableOpacity style={[styles.socialButton, { backgroundColor: isDark ? colors.background : '#F8FAFC' }]}>
                                 <Ionicons name="logo-linkedin" size={24} color="#0A66C2" />
                             </TouchableOpacity>
                         </View>
 
                         {/* Sign Up Link */}
-                        <View className="flex-row justify-center items-center mt-2">
-                            <Text className="text-base text-slate-500">
-                                Don't have an account?{' '}
-                            </Text>
+                        <View style={styles.signupRow}>
+                            <Text style={[styles.signupText, { color: colors.textSecondary }]}>Don't have an account? </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                                <Text className="text-base text-blue-600 font-bold">
-                                    Sign Up
-                                </Text>
+                                <Text style={[styles.signupLink, { color: colors.primary }]}>Sign Up</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -232,5 +198,146 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#F8FAFC',
+    },
+    header: {
+        paddingTop: 60,
+        paddingBottom: 48,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderBottomLeftRadius: 50,
+        borderBottomRightRadius: 50,
+    },
+    floatingCircle: {
+        position: 'absolute',
+        borderRadius: 999,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+    },
+    logoOuter: {
+        width: 112,
+        height: 112,
+        borderRadius: 24,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+    },
+    logoInner: {
+        width: 80,
+        height: 80,
+        borderRadius: 16,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    appTitle: {
+        fontSize: 36,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+        marginBottom: 8,
+        letterSpacing: 1,
+    },
+    appSubtitle: {
+        fontSize: 16,
+        color: 'rgba(255,255,255,0.8)',
+        fontWeight: '500',
+    },
+    formWrapper: {
+        flex: 1,
+        marginTop: -32,
+    },
+    formCard: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        borderTopLeftRadius: 40,
+        borderTopRightRadius: 40,
+        paddingHorizontal: 28,
+        paddingTop: 40,
+        paddingBottom: 32,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 20,
+        elevation: 20,
+    },
+    welcomeTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#1E293B',
+        marginBottom: 8,
+    },
+    welcomeSubtitle: {
+        fontSize: 16,
+        color: '#64748B',
+        marginBottom: 32,
+    },
+    forgotPassword: {
+        alignSelf: 'flex-end',
+        marginBottom: 24,
+    },
+    forgotPasswordText: {
+        color: '#2563EB',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    divider: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 32,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#E2E8F0',
+    },
+    dividerText: {
+        marginHorizontal: 16,
+        color: '#94A3B8',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    socialRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 16,
+        marginBottom: 24,
+    },
+    socialButton: {
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        backgroundColor: '#F8FAFC',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+        elevation: 3,
+    },
+    signupRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    signupText: {
+        fontSize: 16,
+        color: '#64748B',
+    },
+    signupLink: {
+        fontSize: 16,
+        color: '#2563EB',
+        fontWeight: 'bold',
+    },
+});
 
 export default LoginScreen;

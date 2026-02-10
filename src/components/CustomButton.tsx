@@ -5,13 +5,10 @@ import {
     ActivityIndicator,
     ViewStyle,
     TextStyle,
-    View,
+    StyleSheet,
 } from 'react-native';
-// import { styled } from 'nativewind';
-import { LinearGradient as ExpoLinearGradient } from 'expo-linear-gradient';
-
-
-const LinearGradient = styled(ExpoLinearGradient);
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '../context/ThemeContext';
 
 interface CustomButtonProps {
     title: string;
@@ -21,7 +18,6 @@ interface CustomButtonProps {
     disabled?: boolean;
     style?: ViewStyle;
     textStyle?: TextStyle;
-    className?: string;
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -32,26 +28,30 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     disabled = false,
     style,
     textStyle,
-    className,
 }) => {
+    const { colors, isDark } = useTheme();
     if (type === 'gradient') {
         return (
             <TouchableOpacity
                 onPress={onPress}
                 disabled={disabled || loading}
-                className={`rounded-2xl overflow-hidden shadow-lg shadow-blue-500/30 active:opacity-90 ${disabled ? 'opacity-60' : ''} ${className}`}
-                style={style}
+                style={[
+                    styles.gradientButton,
+                    { shadowColor: colors.primary },
+                    disabled && styles.disabled,
+                    style,
+                ]}
             >
                 <LinearGradient
-                    colors={['#2563EB', '#7C3AED']}
+                    colors={[colors.primary, colors.secondary]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    className="py-4 px-6 justify-center items-center"
+                    style={styles.gradientInner}
                 >
                     {loading ? (
-                        <ActivityIndicator color="white" />
+                        <ActivityIndicator color={colors.buttonText} />
                     ) : (
-                        <Text className="text-white text-lg font-bold tracking-wide" style={textStyle}>
+                        <Text style={[styles.gradientText, { color: colors.buttonText }, textStyle]}>
                             {title}
                         </Text>
                     )}
@@ -60,46 +60,89 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         );
     }
 
-    const getButtonStyle = () => {
+    const getButtonStyle = (): ViewStyle => {
         switch (type) {
             case 'primary':
-                return 'bg-blue-600 active:bg-blue-700';
+                return { backgroundColor: colors.primary };
             case 'secondary':
-                return 'bg-purple-600 active:bg-purple-700';
+                return { backgroundColor: colors.secondary };
             case 'outline':
-                return 'bg-transparent border-2 border-blue-600 active:bg-blue-50';
+                return { backgroundColor: 'transparent', borderWidth: 2, borderColor: colors.primary };
             default:
-                return 'bg-blue-600';
+                return { backgroundColor: colors.primary };
         }
     };
 
-    const getTextStyle = () => {
-        switch (type) {
-            case 'outline':
-                return 'text-blue-600';
-            default:
-                return 'text-white';
-        }
+    const getTextColor = (): string => {
+        return type === 'outline' ? colors.primary : colors.buttonText;
     };
 
     return (
         <TouchableOpacity
             onPress={onPress}
             disabled={disabled || loading}
-            className={`py-4 px-6 rounded-2xl justify-center items-center shadow-md ${getButtonStyle()} ${disabled ? 'opacity-60' : ''} ${className}`}
-            style={style}
+            style={[
+                styles.button,
+                getButtonStyle(),
+                disabled && styles.disabled,
+                style,
+            ]}
         >
             {loading ? (
                 <ActivityIndicator
-                    color={type === 'outline' ? '#2563EB' : 'white'}
+                    color={type === 'outline' ? colors.primary : colors.buttonText}
                 />
             ) : (
-                <Text className={`text-lg font-bold tracking-wide ${getTextStyle()}`} style={textStyle}>
+                <Text style={[styles.buttonText, { color: getTextColor() }, textStyle]}>
                     {title}
                 </Text>
             )}
         </TouchableOpacity>
     );
 };
+
+const styles = StyleSheet.create({
+    gradientButton: {
+        borderRadius: 16,
+        overflow: 'hidden',
+        shadowColor: '#2563EB',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    gradientInner: {
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    gradientText: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
+    },
+    button: {
+        paddingVertical: 16,
+        paddingHorizontal: 24,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    buttonText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
+    },
+    disabled: {
+        opacity: 0.6,
+    },
+});
 
 export default CustomButton;

@@ -1,14 +1,9 @@
 // Firebase Configuration for JobSeeker App
-// ⚠️ IMPORTANT: Replace these with your own Firebase config values
-// Go to Firebase Console -> Project Settings -> Your apps -> Config
 
 import { initializeApp, FirebaseApp } from 'firebase/app';
-import { initializeAuth, Auth } from 'firebase/auth';
-// @ts-ignore - getReactNativePersistence is exported but not typed in firebase/auth
-import { getReactNativePersistence } from 'firebase/auth';
+import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAfJxbL9L5f_wbIekfOVx9sv-XwTJS70Cw",
@@ -23,10 +18,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app: FirebaseApp = initializeApp(firebaseConfig);
 
-// Initialize Auth with AsyncStorage persistence
-const auth: Auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage)
-});
+// Initialize Auth (using getAuth which works on all platforms)
+const auth: Auth = getAuth(app);
 
 // Initialize Firestore
 const db: Firestore = getFirestore(app);

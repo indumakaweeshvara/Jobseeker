@@ -8,48 +8,47 @@
 export type ColorKey = keyof typeof COLORS;
 
 export const COLORS = {
-    // Primary Colors
-    primary: '#2563EB',
-    primaryDark: '#1E40AF',
-    primaryLight: '#3B82F6',
-
-    // Secondary Colors
-    secondary: '#7C3AED',
-    secondaryDark: '#5B21B6',
-    secondaryLight: '#8B5CF6',
-
-    // Neutral Colors
-    white: '#FFFFFF',
-    background: '#F1F5F9',
-    card: '#FFFFFF',
-    border: '#E2E8F0',
-
-    // Text Colors
-    textPrimary: '#1E293B',
-    textSecondary: '#64748B',
-    textLight: '#94A3B8',
-    textWhite: '#FFFFFF',
-
-    // Status Colors
-    success: '#10B981',
-    warning: '#F59E0B',
-    error: '#EF4444',
-    info: '#0EA5E9',
-
-    // Status Backgrounds
-    successBg: '#D1FAE5',
-    warningBg: '#FEF3C7',
-    errorBg: '#FEE2E2',
-    infoBg: '#E0F2FE',
-
-    // Gradient
-    gradientStart: '#2563EB',
-    gradientEnd: '#7C3AED',
-
-    // Shadows
-    shadow: '#000000',
-    overlay: 'rgba(0, 0, 0, 0.5)',
+    light: {
+        primary: '#2563EB',
+        primaryDark: '#1E40AF',
+        primaryLight: '#3B82F6',
+        secondary: '#7C3AED',
+        background: '#F1F5F9',
+        card: '#FFFFFF',
+        textPrimary: '#1E293B',
+        textSecondary: '#64748B',
+        border: '#E2E8F0',
+        white: '#FFFFFF',
+        success: '#10B981',
+        error: '#EF4444',
+        warning: '#F59E0B',
+        info: '#0EA5E9',
+        shadow: '#64748B',
+        textLight: '#94A3B8',
+        buttonText: '#FFFFFF',
+    },
+    dark: {
+        primary: '#3B82F6',
+        primaryDark: '#1E3A8A',
+        primaryLight: '#60A5FA',
+        secondary: '#A78BFA',
+        background: '#0F172A',
+        card: '#1E293B',
+        textPrimary: '#F8FAFC',
+        textSecondary: '#94A3B8',
+        border: '#334155',
+        white: '#FFFFFF',
+        success: '#34D399',
+        error: '#F87171',
+        warning: '#FBBF24',
+        info: '#38BDF8',
+        shadow: '#000000',
+        textLight: '#64748B',
+        buttonText: '#FFFFFF',
+    }
 } as const;
+
+export type ThemeColors = typeof COLORS.light;
 
 export const FONTS = {
     regular: 'System',
